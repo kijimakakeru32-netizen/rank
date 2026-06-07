@@ -58,13 +58,15 @@ html,body{
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
 .nav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;
+  flex:1;display:flex;flex-direction:column;align-items:center;position:relative;
   padding:10px 0 8px;cursor:pointer;gap:3px;border:none;background:none;
 }
 .nav-btn svg{width:22px;height:22px;stroke:var(--text3);transition:stroke .2s}
 .nav-lbl{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;color:var(--text3);transition:color .2s;letter-spacing:.02em}
 .nav-btn.on svg{stroke:var(--accent)}
 .nav-btn.on .nav-lbl{color:var(--accent)}
+.nav-unread{position:absolute;top:7px;right:calc(50% - 20px);width:9px;height:9px;border-radius:50%;background:#e8184a;border:2px solid #fff;box-shadow:0 0 0 2px rgba(232,24,74,.14)}
+.nav-unread.hide{display:none}
 
 /* ── PAGES ── */
 .pg{display:none;padding-bottom:88px;animation:fadeUp .3s ease}
@@ -234,14 +236,15 @@ html,body{
 .news-lead-title{font-size:14px;font-weight:700;color:var(--text)}
 .news-lead-text{font-size:12px;color:var(--text2);line-height:1.7;margin-top:5px}
 .news-list{padding:0 16px}
-.news-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:9px}
+.news-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:9px;position:relative;overflow:hidden}
+.news-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#4f3ef5,#00a878)}
 .news-card.pinned{border-color:rgba(26,127,212,.28);box-shadow:0 8px 18px rgba(26,127,212,.08)}
 .news-meta{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .news-badge{font-size:10px;font-weight:700;color:#0a60b0;background:rgba(26,127,212,.1);border-radius:5px;padding:2px 6px}
 .news-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
-.news-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.5}
+.news-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.45;letter-spacing:-.02em}
 .news-body{font-size:12px;color:var(--text2);line-height:1.8;margin-top:6px}
-.news-author{font-size:10px;color:var(--text3);margin-top:9px}
+.news-author{font-size:10px;color:var(--text3);margin-top:12px}
 
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .sp{height:16px}
@@ -758,28 +761,12 @@ html,body{
 <!-- ========== PAGE: NEWS ========== -->
 <div class="pg" id="pg-news">
   <div class="ph"><div class="ph-title">社内報</div><div class="ph-sub">管理者からのアナウンス</div></div>
-  <div class="news-lead">
-    <div class="news-lead-title">全社アナウンス</div>
-    <div class="news-lead-text">管理者が更新した内容が、スタッフ向けのお知らせとしてここに反映されます。</div>
-  </div>
   <div class="news-list">
     <article class="news-card pinned">
-      <div class="news-meta"><span class="news-badge">重要</span><span class="news-date">2026.06.06</span></div>
-      <div class="news-title">6月ランキング集計の運用について</div>
-      <div class="news-body">月間ランキングは月末の営業終了後に確定し、翌月1日にマイページの実績へ反映します。数値確認後、管理者側で確定更新を行います。</div>
-      <div class="news-author">管理者 · 本部</div>
-    </article>
-    <article class="news-card">
-      <div class="news-meta"><span class="news-badge">共有</span><span class="news-date">2026.06.03</span></div>
-      <div class="news-title">口コミ返信テンプレートを更新しました</div>
-      <div class="news-body">新規のお客様とリピーターのお客様で返信文面を分け、次回来店につながる一言を追加しています。各店舗で本日から利用できます。</div>
-      <div class="news-author">管理者 · CS推進</div>
-    </article>
-    <article class="news-card">
-      <div class="news-meta"><span class="news-badge">店舗</span><span class="news-date">2026.06.01</span></div>
-      <div class="news-title">6月キャンペーン開始のお知らせ</div>
-      <div class="news-body">肩こり集中ケアのキャンペーンを開始しました。受付時の案内内容と対象コースを確認し、店舗ごとに掲示物を差し替えてください。</div>
-      <div class="news-author">管理者 · 渋谷本店</div>
+      <div class="news-meta"><span class="news-badge">リリース</span><span class="news-date">2026.06.07</span></div>
+      <div class="news-title">ランキングのアプリをリリース！</div>
+      <div class="news-body">各種指標のランキングが見やすくなりました。個人・店舗ごとの現在地点をすぐに確認できるので、売上、更新率、新規LTV、口コミなど、自分が伸ばすべきポイントを日々の行動に落とし込みやすくなります。まずはマイページで自分の実績を確認し、ランキングで全体の中での立ち位置を見てみてください。</div>
+      <div class="news-author">発信者：木嶋翔</div>
     </article>
   </div>
   <div class="sp"></div>
@@ -796,6 +783,7 @@ html,body{
     <span class="nav-lbl">ランキング</span>
   </button>
   <button class="nav-btn" onclick="switchPage('pg-news',this)">
+    <span class="nav-unread" id="news-unread-badge"></span>
     <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2zM15 4v6h6M7 13h8M7 16h10"/></svg>
     <span class="nav-lbl">社内報</span>
   </button>
@@ -811,6 +799,7 @@ function switchPage(id, btn) {
   document.getElementById(id).classList.add('on');
   btn.classList.add('on');
   if (id === 'pg-profile' && !window._chartDone) initChart();
+  if (id === 'pg-news') markNewsRead();
 }
 
 function openProfilePage() {
@@ -952,6 +941,29 @@ function setLoginStatus(text, isError) {
   if (!el) return;
   el.textContent = text;
   el.classList.toggle('err', !!isError);
+}
+
+var NEWS_ID = 'news-ranking-app-release-20260607';
+
+function isNewsRead() {
+  try {
+    return localStorage.getItem('kotobukiReadNewsId') === NEWS_ID;
+  } catch(e) {
+    return false;
+  }
+}
+
+function updateNewsUnreadBadge() {
+  var badge = document.getElementById('news-unread-badge');
+  if (!badge) return;
+  badge.classList.toggle('hide', isNewsRead());
+}
+
+function markNewsRead() {
+  try {
+    localStorage.setItem('kotobukiReadNewsId', NEWS_ID);
+  } catch(e) {}
+  updateNewsUnreadBadge();
 }
 
 function getSavedLoginUser() {
@@ -1672,6 +1684,7 @@ document.addEventListener('DOMContentLoaded', function(){
   updateBusinessProgress();
   syncRankMonthUi();
   syncProfileMonthUi();
+  updateNewsUnreadBadge();
   bindLoginForm();
   buildZeroMonthlyData();
   loadLoginUsers();

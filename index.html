@@ -865,7 +865,7 @@ html,body{
       <div class="learning-section-sub">PDF</div>
     </div>
     <div class="learning-grid">
-      <a class="learning-card" href="assets/learning/anatomy-bone-muscle-20260401.pdf" target="_blank" rel="noopener">
+      <a class="learning-card" href="assets/learning/anatomy-bone-muscle-20260401.pdf" onclick="return openLearningLink(this)">
         <div class="learning-card-top">
           <div class="learning-icon">📘</div>
           <div><div class="learning-title">解剖学（骨・筋肉）</div><div class="learning-meta">2026.04.01</div></div>
@@ -873,7 +873,7 @@ html,body{
         <div class="learning-desc">整体師として身体を診る土台になる、骨・筋肉の基礎理解を整理します。</div>
         <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
       </a>
-      <a class="learning-card" href="assets/learning/anatomy-nerve-viscera-20260408.pdf" target="_blank" rel="noopener">
+      <a class="learning-card" href="assets/learning/anatomy-nerve-viscera-20260408.pdf" onclick="return openLearningLink(this)">
         <div class="learning-card-top">
           <div class="learning-icon">🧠</div>
           <div><div class="learning-title">解剖学（神経・内臓）</div><div class="learning-meta">2026.04.08</div></div>
@@ -881,7 +881,7 @@ html,body{
         <div class="learning-desc">神経・内臓の関係性を押さえ、不調の背景を立体的に捉えるための資料です。</div>
         <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
       </a>
-      <a class="learning-card" href="assets/learning/physiology-neurophysiology-20260415.pdf" target="_blank" rel="noopener">
+      <a class="learning-card" href="assets/learning/physiology-neurophysiology-20260415.pdf" onclick="return openLearningLink(this)">
         <div class="learning-card-top">
           <div class="learning-icon">⚡</div>
           <div><div class="learning-title">生理学・神経生理学</div><div class="learning-meta">2026.04.15</div></div>
@@ -889,7 +889,7 @@ html,body{
         <div class="learning-desc">身体反応・神経系の働きを理解し、施術説明の説得力を高めるための学習資料です。</div>
         <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
       </a>
-      <a class="learning-card" href="assets/learning/kinesiology-20260501.pdf" target="_blank" rel="noopener">
+      <a class="learning-card" href="assets/learning/kinesiology-20260501.pdf" onclick="return openLearningLink(this)">
         <div class="learning-card-top">
           <div class="learning-icon">🏃</div>
           <div><div class="learning-title">運動学</div><div class="learning-meta">2026.05.01</div></div>
@@ -914,7 +914,7 @@ html,body{
       <div class="learning-section-sub">NOTION</div>
     </div>
     <div class="learning-grid">
-      <a class="learning-card" href="https://quiet-verbena-d39.notion.site/34854547c03a80e09943e1be48a6314c?v=34854547c03a800680f2000c31b847c5" target="_blank" rel="noopener">
+      <a class="learning-card" href="https://quiet-verbena-d39.notion.site/34854547c03a80e09943e1be48a6314c?v=34854547c03a800680f2000c31b847c5" onclick="return openLearningLink(this)">
         <div class="learning-card-top">
           <div class="learning-icon">🗂️</div>
           <div><div class="learning-title">2025年 代表研修アーカイブ</div><div class="learning-meta">Notion database</div></div>
@@ -932,7 +932,7 @@ html,body{
       <div class="learning-section-sub">YOUTUBE</div>
     </div>
     <div class="learning-grid">
-      <a class="learning-card" href="https://www.youtube.com/@seitai-kotobuki-mentor/videos" target="_blank" rel="noopener">
+      <a class="learning-card" href="https://www.youtube.com/@seitai-kotobuki-mentor/videos" onclick="return openLearningLink(this)">
         <div class="mentor-thumb">▶</div>
         <div class="learning-title">整体KOTOBUKI メンターチャンネル</div>
         <div class="learning-meta">YouTube / 最新動画一覧</div>
@@ -991,6 +991,14 @@ function openPageById(id) {
   document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on')});
   var target = document.getElementById(id);
   if (target) target.classList.add('on');
+}
+
+function openLearningLink(link) {
+  var href = link && link.getAttribute('href');
+  if (!href) return false;
+  var url = /^https?:\/\//.test(href) ? href : new URL(href, window.location.href).href;
+  window.location.assign(url);
+  return false;
 }
 
 // ── profile tabs ─────────────────────────────────────────────

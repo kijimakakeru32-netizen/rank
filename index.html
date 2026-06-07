@@ -988,10 +988,15 @@ function isNewsRead() {
 
 function updateNewsUnreadBadge() {
   var read = isNewsRead();
-  var badge = document.getElementById('news-unread-badge');
-  var cardBadge = document.getElementById('news-card-unread');
-  if (badge) badge.classList.toggle('hide', read);
-  if (cardBadge) cardBadge.classList.toggle('hide', read);
+  setNewsUnreadVisible(!read);
+}
+
+function setNewsUnreadVisible(visible) {
+  var markers = document.querySelectorAll('#news-unread-badge,#news-card-unread');
+  markers.forEach(function(marker) {
+    marker.classList.toggle('hide', !visible);
+    marker.style.display = visible ? '' : 'none';
+  });
 }
 
 function markNewsRead() {
@@ -999,15 +1004,12 @@ function markNewsRead() {
   try {
     localStorage.setItem('kotobukiReadNewsId', NEWS_ID);
   } catch(e) {}
-  var badge = document.getElementById('news-unread-badge');
-  var cardBadge = document.getElementById('news-card-unread');
-  if (badge) badge.classList.add('hide');
-  if (cardBadge) cardBadge.classList.add('hide');
+  setNewsUnreadVisible(false);
 }
 
 function openNewsCard() {
-  openPageById('pg-news-detail');
   markNewsRead();
+  openPageById('pg-news-detail');
 }
 
 function backToNewsList() {

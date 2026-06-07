@@ -255,6 +255,37 @@ html,body{
 .news-detail-author{font-size:11px;color:var(--text3);margin-top:16px}
 .news-back{border:1px solid var(--border2);background:#fff;color:var(--text2);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;margin:0 16px 14px;cursor:pointer}
 
+/* ── LEARNING ── */
+.learning-hero{margin:0 16px 16px;border:1px solid rgba(79,62,245,.16);border-radius:22px;padding:18px;background:
+  radial-gradient(circle at 88% 14%,rgba(0,168,120,.18),transparent 30%),
+  linear-gradient(135deg,#121225,#3f34d8);color:#fff;box-shadow:0 18px 40px rgba(25,25,70,.16)}
+.learning-kicker{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(255,255,255,.62);text-transform:uppercase}
+.learning-hero-title{font-size:22px;font-weight:900;line-height:1.35;letter-spacing:-.04em;margin-top:8px}
+.learning-hero-text{font-size:12px;line-height:1.8;color:rgba(255,255,255,.76);margin-top:8px}
+.learning-section{padding:0 16px;margin-top:18px}
+.learning-section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:10px}
+.learning-section-title{font-size:17px;font-weight:900;color:var(--text);letter-spacing:-.03em}
+.learning-section-sub{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.learning-grid{display:grid;gap:10px}
+.learning-card{display:block;text-decoration:none;background:#fff;border:1px solid var(--border);border-radius:18px;padding:15px;position:relative;overflow:hidden;color:inherit;box-shadow:0 10px 24px rgba(15,15,40,.05);transition:transform .18s,box-shadow .18s,border-color .18s}
+.learning-card:active{transform:scale(.99)}
+.learning-card::before{content:'';position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,#4f3ef5,#00a878)}
+.learning-card.disabled{opacity:.58;cursor:not-allowed}
+.learning-card.disabled::before{background:linear-gradient(90deg,#a0a0b4,#d0d0dc)}
+.learning-card-top{display:flex;gap:12px;align-items:flex-start}
+.learning-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex:0 0 auto;background:linear-gradient(135deg,rgba(79,62,245,.12),rgba(0,168,120,.12));font-size:20px}
+.learning-title{font-size:15px;font-weight:900;color:var(--text);line-height:1.5;letter-spacing:-.02em}
+.learning-meta{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:4px}
+.learning-desc{font-size:12px;color:var(--text2);line-height:1.75;margin-top:10px}
+.learning-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.learning-pill{font-size:10px;font-weight:800;border-radius:999px;padding:5px 8px;background:rgba(79,62,245,.08);color:#3728d0}
+.learning-pill.green{background:rgba(0,168,120,.1);color:#007d5a}
+.learning-pill.gray{background:rgba(15,15,40,.06);color:var(--text3)}
+.mentor-thumb{height:126px;border-radius:15px;background:
+  radial-gradient(circle at 24% 24%,rgba(255,255,255,.22),transparent 20%),
+  linear-gradient(135deg,#0d0d1a,#e8184a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:42px;font-weight:900;font-family:'DM Sans',sans-serif;margin-bottom:12px}
+.learning-note{font-size:11px;color:var(--text3);line-height:1.7;margin-top:9px}
+
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .sp{height:16px}
 </style>
@@ -819,6 +850,100 @@ html,body{
   <div class="sp"></div>
 </div><!-- /pg-news-detail-test -->
 
+<!-- ========== PAGE: LEARNING ========== -->
+<div class="pg" id="pg-learning">
+  <div class="ph"><div class="ph-title">学習ページ</div><div class="ph-sub">社内の研修コンテンツにいつでもアクセス</div></div>
+  <div class="learning-hero">
+    <div class="learning-kicker">KOTOBUKI LEARNING HUB</div>
+    <div class="learning-hero-title">必要な知識に、迷わず戻れる。</div>
+    <div class="learning-hero-text">代表研修・過去セミナー・メンター動画をまとめた学習ポータルです。移動中でも、空き時間でも、次の成長材料へすぐアクセスできます。</div>
+  </div>
+
+  <section class="learning-section">
+    <div class="learning-section-head">
+      <div class="learning-section-title">代表研修 2026年</div>
+      <div class="learning-section-sub">PDF</div>
+    </div>
+    <div class="learning-grid">
+      <a class="learning-card" href="assets/learning/anatomy-bone-muscle-20260401.pdf" target="_blank" rel="noopener">
+        <div class="learning-card-top">
+          <div class="learning-icon">📘</div>
+          <div><div class="learning-title">解剖学（骨・筋肉）</div><div class="learning-meta">2026.04.01</div></div>
+        </div>
+        <div class="learning-desc">整体師として身体を診る土台になる、骨・筋肉の基礎理解を整理します。</div>
+        <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
+      </a>
+      <a class="learning-card" href="assets/learning/anatomy-nerve-viscera-20260408.pdf" target="_blank" rel="noopener">
+        <div class="learning-card-top">
+          <div class="learning-icon">🧠</div>
+          <div><div class="learning-title">解剖学（神経・内臓）</div><div class="learning-meta">2026.04.08</div></div>
+        </div>
+        <div class="learning-desc">神経・内臓の関係性を押さえ、不調の背景を立体的に捉えるための資料です。</div>
+        <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
+      </a>
+      <a class="learning-card" href="assets/learning/physiology-neurophysiology-20260415.pdf" target="_blank" rel="noopener">
+        <div class="learning-card-top">
+          <div class="learning-icon">⚡</div>
+          <div><div class="learning-title">生理学・神経生理学</div><div class="learning-meta">2026.04.15</div></div>
+        </div>
+        <div class="learning-desc">身体反応・神経系の働きを理解し、施術説明の説得力を高めるための学習資料です。</div>
+        <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
+      </a>
+      <a class="learning-card" href="assets/learning/kinesiology-20260501.pdf" target="_blank" rel="noopener">
+        <div class="learning-card-top">
+          <div class="learning-icon">🏃</div>
+          <div><div class="learning-title">運動学</div><div class="learning-meta">2026.05.01</div></div>
+        </div>
+        <div class="learning-desc">関節運動・動作分析の原理原則を押さえ、評価と施術の精度を高めます。</div>
+        <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
+      </a>
+      <div class="learning-card disabled">
+        <div class="learning-card-top">
+          <div class="learning-icon">🧍</div>
+          <div><div class="learning-title">姿勢・バイオメカニクス</div><div class="learning-meta">2026.05.07</div></div>
+        </div>
+        <div class="learning-desc">資料が追加され次第、ここから閲覧できるようにします。</div>
+        <div class="learning-actions"><span class="learning-pill gray">PDF準備中</span><span class="learning-pill green">代表研修</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="learning-section">
+    <div class="learning-section-head">
+      <div class="learning-section-title">代表研修 2025年</div>
+      <div class="learning-section-sub">NOTION</div>
+    </div>
+    <div class="learning-grid">
+      <a class="learning-card" href="https://quiet-verbena-d39.notion.site/34854547c03a80e09943e1be48a6314c?v=34854547c03a800680f2000c31b847c5" target="_blank" rel="noopener">
+        <div class="learning-card-top">
+          <div class="learning-icon">🗂️</div>
+          <div><div class="learning-title">2025年 代表研修アーカイブ</div><div class="learning-meta">Notion database</div></div>
+        </div>
+        <div class="learning-desc">2025年の研修タイトル・公開日・YouTubeリンクをNotionで確認できます。個別カード化できるよう、次の更新で一覧データ連携に対応予定です。</div>
+        <div class="learning-actions"><span class="learning-pill">Notionを開く</span><span class="learning-pill green">YouTubeリンクあり</span></div>
+      </a>
+    </div>
+    <div class="learning-note">Notionページの個別データを公開取得できる状態になったら、タイトル・公開日・YouTubeリンクをこの画面内にカードとして展開できます。</div>
+  </section>
+
+  <section class="learning-section">
+    <div class="learning-section-head">
+      <div class="learning-section-title">メンター</div>
+      <div class="learning-section-sub">YOUTUBE</div>
+    </div>
+    <div class="learning-grid">
+      <a class="learning-card" href="https://www.youtube.com/@seitai-kotobuki-mentor/videos" target="_blank" rel="noopener">
+        <div class="mentor-thumb">▶</div>
+        <div class="learning-title">整体KOTOBUKI メンターチャンネル</div>
+        <div class="learning-meta">YouTube / 最新動画一覧</div>
+        <div class="learning-desc">メンター動画の最新一覧をYouTubeで開きます。チャンネル側に動画が追加されると、YouTube上の一覧も自動で更新されます。</div>
+        <div class="learning-actions"><span class="learning-pill">YouTubeを開く</span><span class="learning-pill green">メンター</span></div>
+      </a>
+    </div>
+  </section>
+  <div class="sp"></div>
+</div><!-- /pg-learning -->
+
 <!-- NAV -->
 <nav class="nav">
   <button class="nav-btn on" onclick="switchPage('pg-profile',this)">
@@ -833,6 +958,10 @@ html,body{
     <span class="nav-unread" id="news-unread-badge"></span>
     <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2zM15 4v6h6M7 13h8M7 16h10"/></svg>
     <span class="nav-lbl">社内報</span>
+  </button>
+  <button class="nav-btn" onclick="switchPage('pg-learning',this)">
+    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75c-1.9-1.1-4.2-1.7-7-1.75v13.5c2.8.05 5.1.65 7 1.75m0-13.5c1.9-1.1 4.2-1.7 7-1.75v13.5c-2.8.05-5.1.65-7 1.75m0-13.5v13.5"/></svg>
+    <span class="nav-lbl">学習</span>
   </button>
 </nav>
 </div>

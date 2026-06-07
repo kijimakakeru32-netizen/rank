@@ -974,10 +974,13 @@ function setLoginStatus(text, isError) {
 }
 
 var NEWS_ID = 'news-ranking-app-release-20260607-v2';
+var newsReadMemory = false;
 
 function isNewsRead() {
+  if (newsReadMemory) return true;
   try {
-    return localStorage.getItem('kotobukiReadNewsId') === NEWS_ID;
+    newsReadMemory = localStorage.getItem('kotobukiReadNewsId') === NEWS_ID;
+    return newsReadMemory;
   } catch(e) {
     return false;
   }
@@ -992,10 +995,14 @@ function updateNewsUnreadBadge() {
 }
 
 function markNewsRead() {
+  newsReadMemory = true;
   try {
     localStorage.setItem('kotobukiReadNewsId', NEWS_ID);
   } catch(e) {}
-  updateNewsUnreadBadge();
+  var badge = document.getElementById('news-unread-badge');
+  var cardBadge = document.getElementById('news-card-unread');
+  if (badge) badge.classList.add('hide');
+  if (cardBadge) cardBadge.classList.add('hide');
 }
 
 function openNewsCard() {

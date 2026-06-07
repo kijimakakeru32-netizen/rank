@@ -236,15 +236,22 @@ html,body{
 .news-lead-title{font-size:14px;font-weight:700;color:var(--text)}
 .news-lead-text{font-size:12px;color:var(--text2);line-height:1.7;margin-top:5px}
 .news-list{padding:0 16px}
-.news-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:9px;position:relative;overflow:hidden}
+.news-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:9px;position:relative;overflow:hidden;cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s}
+.news-card:active{transform:scale(.99)}
 .news-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#4f3ef5,#00a878)}
 .news-card.pinned{border-color:rgba(26,127,212,.28);box-shadow:0 8px 18px rgba(26,127,212,.08)}
+.news-card.open{border-color:rgba(79,62,245,.28);box-shadow:0 12px 26px rgba(79,62,245,.1)}
 .news-meta{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .news-badge{font-size:10px;font-weight:700;color:#0a60b0;background:rgba(26,127,212,.1);border-radius:5px;padding:2px 6px}
 .news-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
 .news-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.45;letter-spacing:-.02em}
-.news-body{font-size:12px;color:var(--text2);line-height:1.8;margin-top:6px}
+.news-body{display:none;font-size:12px;color:var(--text2);line-height:1.8;margin-top:10px}
+.news-card.open .news-body{display:block}
 .news-author{font-size:10px;color:var(--text3);margin-top:12px}
+.news-card-unread{position:absolute;top:14px;right:14px;width:10px;height:10px;border-radius:50%;background:#e8184a;box-shadow:0 0 0 4px rgba(232,24,74,.1)}
+.news-card-unread.hide{display:none}
+.news-open-hint{font-size:10px;color:var(--text3);margin-top:9px;font-weight:700}
+.news-card.open .news-open-hint{display:none}
 
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .sp{height:16px}
@@ -762,9 +769,11 @@ html,body{
 <div class="pg" id="pg-news">
   <div class="ph"><div class="ph-title">社内報</div><div class="ph-sub">管理者からのアナウンス</div></div>
   <div class="news-list">
-    <article class="news-card pinned">
+    <article class="news-card pinned" id="news-release-card" onclick="openNewsCard()">
+      <span class="news-card-unread" id="news-card-unread"></span>
       <div class="news-meta"><span class="news-badge">リリース</span><span class="news-date">2026.06.07</span></div>
       <div class="news-title">ランキングのアプリをリリース！</div>
+      <div class="news-open-hint">タップして本文を読む</div>
       <div class="news-body">各種指標のランキングが見やすくなりました。個人・店舗ごとの現在地点をすぐに確認できるので、売上、更新率、新規LTV、口コミなど、自分が伸ばすべきポイントを日々の行動に落とし込みやすくなります。まずはマイページで自分の実績を確認し、ランキングで全体の中での立ち位置を見てみてください。</div>
       <div class="news-author">発信者：木嶋翔</div>
     </article>
@@ -799,7 +808,6 @@ function switchPage(id, btn) {
   document.getElementById(id).classList.add('on');
   btn.classList.add('on');
   if (id === 'pg-profile' && !window._chartDone) initChart();
-  if (id === 'pg-news') markNewsRead();
 }
 
 function openProfilePage() {
@@ -943,7 +951,7 @@ function setLoginStatus(text, isError) {
   el.classList.toggle('err', !!isError);
 }
 
-var NEWS_ID = 'news-ranking-app-release-20260607';
+var NEWS_ID = 'news-ranking-app-release-20260607-v2';
 
 function isNewsRead() {
   try {
@@ -954,9 +962,11 @@ function isNewsRead() {
 }
 
 function updateNewsUnreadBadge() {
+  var read = isNewsRead();
   var badge = document.getElementById('news-unread-badge');
-  if (!badge) return;
-  badge.classList.toggle('hide', isNewsRead());
+  var cardBadge = document.getElementById('news-card-unread');
+  if (badge) badge.classList.toggle('hide', read);
+  if (cardBadge) cardBadge.classList.toggle('hide', read);
 }
 
 function markNewsRead() {
@@ -964,6 +974,12 @@ function markNewsRead() {
     localStorage.setItem('kotobukiReadNewsId', NEWS_ID);
   } catch(e) {}
   updateNewsUnreadBadge();
+}
+
+function openNewsCard() {
+  var card = document.getElementById('news-release-card');
+  if (card) card.classList.add('open');
+  markNewsRead();
 }
 
 function getSavedLoginUser() {

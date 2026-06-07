@@ -771,10 +771,17 @@ html,body{
 <div class="pg" id="pg-news">
   <div class="ph"><div class="ph-title">社内報</div><div class="ph-sub">管理者からのアナウンス</div></div>
   <div class="news-list">
-    <article class="news-card pinned" id="news-release-card" onclick="openNewsCard()">
-      <span class="news-card-unread" id="news-card-unread"></span>
+    <article class="news-card pinned" id="news-release-card" onclick="openNewsCard('release','pg-news-detail')">
+      <span class="news-card-unread" id="news-card-unread-release"></span>
       <div class="news-meta"><span class="news-badge">リリース</span><span class="news-date">2026.06.07</span></div>
       <div class="news-title">ランキングのアプリをリリース！</div>
+      <div class="news-open-hint">タップして本文を読む</div>
+      <div class="news-author">発信者：木嶋翔</div>
+    </article>
+    <article class="news-card" id="news-test-card" onclick="openNewsCard('test','pg-news-detail-test')">
+      <span class="news-card-unread" id="news-card-unread-test"></span>
+      <div class="news-meta"><span class="news-badge">社内報</span><span class="news-date">2026.06.08</span></div>
+      <div class="news-title">テスト</div>
       <div class="news-open-hint">タップして本文を読む</div>
       <div class="news-author">発信者：木嶋翔</div>
     </article>
@@ -796,6 +803,21 @@ html,body{
   </div>
   <div class="sp"></div>
 </div><!-- /pg-news-detail -->
+
+<!-- ========== PAGE: NEWS DETAIL TEST ========== -->
+<div class="pg" id="pg-news-detail-test">
+  <div class="ph"><div class="ph-title">社内報</div><div class="ph-sub">詳細</div></div>
+  <button class="news-back" type="button" onclick="backToNewsList()">← 一覧に戻る</button>
+  <div class="news-detail">
+    <article class="news-detail-card">
+      <div class="news-meta"><span class="news-badge">社内報</span><span class="news-date">2026.06.08</span></div>
+      <div class="news-detail-title">テスト</div>
+      <div class="news-detail-body">これはテストです。</div>
+      <div class="news-detail-author">発信者：木嶋翔</div>
+    </article>
+  </div>
+  <div class="sp"></div>
+</div><!-- /pg-news-detail-test -->
 
 <!-- NAV -->
 <nav class="nav">
@@ -1003,43 +1025,56 @@ function mergeLoginUsers(users, includeDefault) {
   return Object.keys(map).map(function(key) { return map[key]; });
 }
 
-var NEWS_ID = 'news-ranking-app-release-20260607-v2';
-var newsReadMemory = false;
+var NEWS_IDS = ['release', 'test'];
+var newsReadMemory = {};
 
-function isNewsRead() {
-  if (newsReadMemory) return true;
+function newsStorageKey(id) {
+  return 'kotobukiReadNewsId_' + id;
+}
+
+function isNewsRead(id) {
+  if (newsReadMemory[id]) return true;
   try {
-    newsReadMemory = localStorage.getItem('kotobukiReadNewsId') === NEWS_ID;
-    return newsReadMemory;
+    newsReadMemory[id] = localStorage.getItem(newsStorageKey(id)) === 'read';
+    return newsReadMemory[id];
   } catch(e) {
     return false;
   }
 }
 
 function updateNewsUnreadBadge() {
-  var read = isNewsRead();
-  setNewsUnreadVisible(!read);
+  var hasUnread = false;
+  NEWS_IDS.forEach(function(id) {
+    var unread = !isNewsRead(id);
+    hasUnread = hasUnread || unread;
+    setNewsUnreadVisible(id, unread);
+  });
+  var nav = document.getElementById('news-unread-badge');
+  if (nav) {
+    nav.classList.toggle('hide', !hasUnread);
+    nav.style.display = hasUnread ? '' : 'none';
+  }
 }
 
-function setNewsUnreadVisible(visible) {
-  var markers = document.querySelectorAll('#news-unread-badge,#news-card-unread');
+function setNewsUnreadVisible(id, visible) {
+  var markers = document.querySelectorAll('#news-card-unread-' + id);
   markers.forEach(function(marker) {
     marker.classList.toggle('hide', !visible);
     marker.style.display = visible ? '' : 'none';
   });
 }
 
-function markNewsRead() {
-  newsReadMemory = true;
+function markNewsRead(id) {
+  newsReadMemory[id] = true;
   try {
-    localStorage.setItem('kotobukiReadNewsId', NEWS_ID);
+    localStorage.setItem(newsStorageKey(id), 'read');
   } catch(e) {}
-  setNewsUnreadVisible(false);
+  updateNewsUnreadBadge();
 }
 
-function openNewsCard() {
-  markNewsRead();
-  openPageById('pg-news-detail');
+function openNewsCard(id, pageId) {
+  markNewsRead(id);
+  openPageById(pageId);
 }
 
 function backToNewsList() {

@@ -1051,7 +1051,6 @@ function logout() {
   try {
     sessionStorage.removeItem('seikocareLoginUser');
   } catch(e) {}
-  stopSheetAutoRefresh();
   appData.loginUser = null;
   var login = document.getElementById('login-screen');
   var app = document.getElementById('app-root');
@@ -1075,16 +1074,37 @@ function bindLoginForm() {
     var pass = (document.getElementById('login-pass') || {}).value || '';
     id = id.trim();
     pass = pass.trim();
-    var user = appData.loginUsers.find(function(item) {
-      return item.id === id && item.pass === pass;
+    btn.disabled = true;
+    btn.textContent = '最新データを確認中...';
+    loadStaffMasterData().then(function(users) {
+      appData.loginUsers = users;
+      var user = findLoginUser(id, pass);
+      if (!user) {
+        setLoginStatus('IDまたはパスワードが違います。もう一度確認してください。', true);
+        return;
+      }
+      setLoginStatus(user.name + 'さんとしてログインします。', false);
+      unlockApp(user);
+    }).catch(function(err) {
+      console.warn(err);
+      var user = findLoginUser(id, pass);
+      if (!user) {
+        setLoginStatus('最新のスタッフマスタを確認できませんでした。少し時間を置いて再度お試しください。', true);
+        return;
+      }
+      setLoginStatus(user.name + 'さんとしてログインします。', false);
+      unlockApp(user);
+    }).then(function() {
+      btn.disabled = false;
+      btn.textContent = 'ログイン';
     });
-    if (!user) {
-      setLoginStatus('IDまたはパスワードが違います。もう一度確認してください。', true);
-      return;
-    }
-    setLoginStatus(user.name + 'さんとしてログインします。', false);
-    unlockApp(user);
   });
+}
+
+function findLoginUser(id, pass) {
+  return appData.loginUsers.find(function(item) {
+    return item.id === id && item.pass === pass;
+  }) || null;
 }
 
 function loadLoginUsers() {
@@ -1263,7 +1283,7 @@ function parseLoginTable(table) {
       status: String(status || '').trim()
     };
   }).filter(function(user) {
-    return !user.status || user.status === '在職中';
+    return !/(退職|停止|無効)/.test(user.status);
   });
 }
 
@@ -1416,14 +1436,14 @@ function syncLoggedUserFromMaster() {
 }
 
 function refreshAppDataSilently() {
-  if (!appData.loginUser) return;
   if (document.hidden) return;
   loadStaffMasterData().then(function(users) {
     appData.loginUsers = users;
-    syncLoggedUserFromMaster();
+    if (appData.loginUser) syncLoggedUserFromMaster();
   }).catch(function(err) {
     console.warn(err);
   }).then(function() {
+    if (!appData.loginUser) return;
     loadMonthlySheetData({ rankingOnly: !shouldAutoUpdateProfile(), silent: true });
   });
 }
@@ -1860,6 +1880,7 @@ document.addEventListener('DOMContentLoaded', function(){
   bindLoginForm();
   buildZeroMonthlyData();
   loadLoginUsers();
+  startSheetAutoRefresh();
 });
 
 document.addEventListener('visibilitychange', function() {

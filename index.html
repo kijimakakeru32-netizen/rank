@@ -1093,8 +1093,8 @@ function loadLoginUsers() {
     btn.disabled = true;
     btn.textContent = '認証データを読み込み中...';
   }
-  return loadGoogleSheetByGid(LOGIN_GID).then(function(table) {
-    appData.loginUsers = parseLoginTable(table);
+  return loadStaffMasterData().then(function(users) {
+    appData.loginUsers = users;
     if (btn) {
       btn.disabled = false;
       btn.textContent = 'ログイン';
@@ -1102,7 +1102,8 @@ function loadLoginUsers() {
     setLoginStatus('', false);
     var saved = getSavedLoginUser();
     if (saved && saved.id) {
-      var user = appData.loginUsers.find(function(item){ return item.id === saved.id && item.name === saved.name; });
+      var idMatches = appData.loginUsers.filter(function(item){ return item.id === saved.id; });
+      var user = idMatches.find(function(item){ return item.name === saved.name; }) || (idMatches.length === 1 ? idMatches[0] : null);
       if (user) unlockApp(user);
     }
   }).catch(function(err) {
@@ -1113,6 +1114,13 @@ function loadLoginUsers() {
       btn.textContent = 'ログイン';
     }
     setLoginStatus('', false);
+  });
+}
+
+function loadStaffMasterData() {
+  return loadGoogleSheetByGid(LOGIN_GID).then(function(table) {
+    var users = parseLoginTable(table);
+    return users.length ? users : DEFAULT_LOGIN_USERS.slice();
   });
 }
 
@@ -1151,7 +1159,7 @@ function loadGoogleSheetByGid(gid) {
   return new Promise(function(resolve, reject) {
     var cb = 'sheetCb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
     var script = document.createElement('script');
-    var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json;responseHandler:' + cb + '&gid=' + encodeURIComponent(gid);
+    var url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json;responseHandler:' + cb + '&gid=' + encodeURIComponent(gid) + '&cacheBust=' + Date.now();
     var timer = setTimeout(function() {
       cleanup();
       reject(new Error('timeout'));
@@ -1194,6 +1202,53 @@ function normalizeName(name) {
   return String(name || '').replace(/\s+/g, '').trim();
 }
 
+function firstNameToken(name) {
+  return String(name || '').trim().split(/\s+/)[0];
+}
+
+function resolveStaffDisplayName(name) {
+  var raw = String(name || '').trim();
+  if (!raw) return raw;
+  var normalized = normalizeName(raw);
+  var users = appData.loginUsers.length ? appData.loginUsers : DEFAULT_LOGIN_USERS;
+  var exact = users.find(function(user) {
+    return normalizeName(user.name) === normalized;
+  });
+  if (exact) return exact.name;
+  var surnameMatches = users.filter(function(user) {
+    return normalizeName(firstNameToken(user.name)) === normalized;
+  });
+  return surnameMatches.length === 1 ? surnameMatches[0].name : raw;
+}
+
+function cloneStaffItem(item) {
+  return Object.assign({}, zeroStaffFrom(item), item);
+}
+
+function mergeStaffItems(items) {
+  var map = {};
+  (items || []).forEach(function(item) {
+    var key = normalizeName(item.name);
+    if (!key) return;
+    if (!map[key]) {
+      map[key] = cloneStaffItem(item);
+      return;
+    }
+    var target = map[key];
+    ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','reviews','workDays'].forEach(function(field) {
+      target[field] = Number(target[field] || 0) + Number(item[field] || 0);
+    });
+    ['nextBookingRate','repeatRate','ticketPurchaseRate','renewalRate'].forEach(function(field) {
+      target[field] = Math.max(Number(target[field] || 0), Number(item[field] || 0));
+    });
+    target.ltv = target.newCount + target.existingCount ? target.totalSales / (target.newCount + target.existingCount) : 0;
+    target.newLtv = target.newCount ? target.newSales / target.newCount : 0;
+    target.renewalLtv = target.renewalCount ? target.renewalSales / target.renewalCount : 0;
+    target.renewalRate = target.existingCount ? target.renewalCount / target.existingCount : target.renewalRate;
+  });
+  return Object.keys(map).map(function(key) { return map[key]; });
+}
+
 function parseLoginTable(table) {
   return (table.rows || []).map(function(row) {
     var name = cell(row, 1);
@@ -1213,12 +1268,12 @@ function parseLoginTable(table) {
 }
 
 function parseStaffTable(table) {
-  return (table.rows || []).slice(0, STAFF_SHEET_LAST_ROW).map(function(row) {
+  var rows = (table.rows || []).slice(0, STAFF_SHEET_LAST_ROW).map(function(row) {
     var name = cell(row, 1);
     if (!name || name === 'スタッフ名') return null;
     var offset = Number(cell(row, 2) || 0) < 1 && Number(cell(row, 3) || 0) > 1000 ? 1 : 0;
     return {
-      name: String(name),
+      name: resolveStaffDisplayName(name),
       totalSales: Number(cell(row, 2 + offset) || 0),
       newSales: Number(cell(row, 3 + offset) || 0),
       existingSales: Number(cell(row, 4 + offset) || 0),
@@ -1237,6 +1292,7 @@ function parseStaffTable(table) {
       workDays: Number(cell(row, 21 + offset) || 0)
     };
   }).filter(Boolean);
+  return mergeStaffItems(rows);
 }
 
 function parseStoreTable(table) {
@@ -1341,15 +1397,40 @@ function shouldAutoUpdateProfile() {
   return sameMonth(rankMonth, profileMonth);
 }
 
-function refreshSheetDataSilently() {
+function syncLoggedUserFromMaster() {
+  if (!appData.loginUser) return;
+  var current = appData.loginUser;
+  var idMatches = appData.loginUsers.filter(function(user) {
+    return user.id === current.id;
+  });
+  var updated = idMatches.find(function(user) {
+    return user.pass === current.pass;
+  }) || idMatches.find(function(user) {
+    return user.name === current.name;
+  }) || (idMatches.length === 1 ? idMatches[0] : null);
+  if (!updated) return;
+  appData.loginUser = updated;
+  try {
+    sessionStorage.setItem('seikocareLoginUser', JSON.stringify({ name: updated.name, id: updated.id }));
+  } catch(e) {}
+}
+
+function refreshAppDataSilently() {
   if (!appData.loginUser) return;
   if (document.hidden) return;
-  loadMonthlySheetData({ rankingOnly: !shouldAutoUpdateProfile(), silent: true });
+  loadStaffMasterData().then(function(users) {
+    appData.loginUsers = users;
+    syncLoggedUserFromMaster();
+  }).catch(function(err) {
+    console.warn(err);
+  }).then(function() {
+    loadMonthlySheetData({ rankingOnly: !shouldAutoUpdateProfile(), silent: true });
+  });
 }
 
 function startSheetAutoRefresh() {
   stopSheetAutoRefresh();
-  sheetAutoRefreshTimer = setInterval(refreshSheetDataSilently, SHEET_REFRESH_INTERVAL_MS);
+  sheetAutoRefreshTimer = setInterval(refreshAppDataSilently, SHEET_REFRESH_INTERVAL_MS);
 }
 
 function stopSheetAutoRefresh() {
@@ -1782,7 +1863,7 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) refreshSheetDataSilently();
+  if (!document.hidden) refreshAppDataSilently();
 });
 </script>
 </body>

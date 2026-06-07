@@ -240,18 +240,20 @@ html,body{
 .news-card:active{transform:scale(.99)}
 .news-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#4f3ef5,#00a878)}
 .news-card.pinned{border-color:rgba(26,127,212,.28);box-shadow:0 8px 18px rgba(26,127,212,.08)}
-.news-card.open{border-color:rgba(79,62,245,.28);box-shadow:0 12px 26px rgba(79,62,245,.1)}
 .news-meta{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .news-badge{font-size:10px;font-weight:700;color:#0a60b0;background:rgba(26,127,212,.1);border-radius:5px;padding:2px 6px}
 .news-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
 .news-title{font-size:17px;font-weight:800;color:var(--text);line-height:1.45;letter-spacing:-.02em}
-.news-body{display:none;font-size:12px;color:var(--text2);line-height:1.8;margin-top:10px}
-.news-card.open .news-body{display:block}
 .news-author{font-size:10px;color:var(--text3);margin-top:12px}
 .news-card-unread{position:absolute;top:14px;right:14px;width:10px;height:10px;border-radius:50%;background:#e8184a;box-shadow:0 0 0 4px rgba(232,24,74,.1)}
 .news-card-unread.hide{display:none}
 .news-open-hint{font-size:10px;color:var(--text3);margin-top:9px;font-weight:700}
-.news-card.open .news-open-hint{display:none}
+.news-detail{padding:0 16px}
+.news-detail-card{background:#fff;border:1px solid var(--border);border-radius:var(--r2);padding:18px;box-shadow:0 10px 26px rgba(15,15,40,.06)}
+.news-detail-title{font-size:22px;font-weight:800;color:var(--text);line-height:1.45;letter-spacing:-.03em;margin-top:8px}
+.news-detail-body{font-size:13px;color:var(--text2);line-height:1.9;margin-top:14px}
+.news-detail-author{font-size:11px;color:var(--text3);margin-top:16px}
+.news-back{border:1px solid var(--border2);background:#fff;color:var(--text2);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;margin:0 16px 14px;cursor:pointer}
 
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .sp{height:16px}
@@ -774,12 +776,26 @@ html,body{
       <div class="news-meta"><span class="news-badge">リリース</span><span class="news-date">2026.06.07</span></div>
       <div class="news-title">ランキングのアプリをリリース！</div>
       <div class="news-open-hint">タップして本文を読む</div>
-      <div class="news-body">各種指標のランキングが見やすくなりました。個人・店舗ごとの現在地点をすぐに確認できるので、売上、更新率、新規LTV、口コミなど、自分が伸ばすべきポイントを日々の行動に落とし込みやすくなります。まずはマイページで自分の実績を確認し、ランキングで全体の中での立ち位置を見てみてください。</div>
       <div class="news-author">発信者：木嶋翔</div>
     </article>
   </div>
   <div class="sp"></div>
 </div><!-- /pg-news -->
+
+<!-- ========== PAGE: NEWS DETAIL ========== -->
+<div class="pg" id="pg-news-detail">
+  <div class="ph"><div class="ph-title">社内報</div><div class="ph-sub">詳細</div></div>
+  <button class="news-back" type="button" onclick="backToNewsList()">← 一覧に戻る</button>
+  <div class="news-detail">
+    <article class="news-detail-card">
+      <div class="news-meta"><span class="news-badge">リリース</span><span class="news-date">2026.06.07</span></div>
+      <div class="news-detail-title">ランキングのアプリをリリース！</div>
+      <div class="news-detail-body">各種指標のランキングが見やすくなりました。個人・店舗ごとの現在地点をすぐに確認できるので、売上、更新率、新規LTV、口コミなど、自分が伸ばすべきポイントを日々の行動に落とし込みやすくなります。まずはマイページで自分の実績を確認し、ランキングで全体の中での立ち位置を見てみてください。日々の数字をただ眺めるだけではなく、次の一手を考えるための材料として活用していきましょう。</div>
+      <div class="news-detail-author">発信者：木嶋翔</div>
+    </article>
+  </div>
+  <div class="sp"></div>
+</div><!-- /pg-news-detail -->
 
 <!-- NAV -->
 <nav class="nav">
@@ -818,6 +834,12 @@ function openProfilePage() {
   if (profile) profile.classList.add('on');
   if (profileBtn) profileBtn.classList.add('on');
   if (!window._chartDone) initChart();
+}
+
+function openPageById(id) {
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('on')});
+  var target = document.getElementById(id);
+  if (target) target.classList.add('on');
 }
 
 // ── profile tabs ─────────────────────────────────────────────
@@ -977,9 +999,12 @@ function markNewsRead() {
 }
 
 function openNewsCard() {
-  var card = document.getElementById('news-release-card');
-  if (card) card.classList.add('open');
+  openPageById('pg-news-detail');
   markNewsRead();
+}
+
+function backToNewsList() {
+  openPageById('pg-news');
 }
 
 function getSavedLoginUser() {

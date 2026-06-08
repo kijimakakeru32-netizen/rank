@@ -2066,6 +2066,14 @@ function isRenewalRateMetric(cat) {
   return /(^|-)fan-rate$/.test(String(cat || ''));
 }
 
+function isRenewalLtvMetric(cat) {
+  return /(^|-)fan-price$/.test(String(cat || ''));
+}
+
+function isRenewalWeightedMetric(cat) {
+  return isRenewalRateMetric(cat) || isRenewalLtvMetric(cat);
+}
+
 function renewalRatio(item) {
   return Math.round(Number(item && item.renewalCount || 0)) + '/' + Math.round(Number(item && item.renewalEndCount || 0));
 }
@@ -2078,14 +2086,23 @@ function renewalRateScore(item) {
   return rate * (1 + Math.log1p(endCount + renewalCount) / 2);
 }
 
+function renewalLtvScore(item) {
+  var ltv = Number(item && item.renewalLtv || 0);
+  var renewalCount = Number(item && item.renewalCount || 0);
+  var endCount = Number(item && item.renewalEndCount || 0);
+  if (!ltv || !renewalCount || !endCount) return 0;
+  return ltv * Math.log1p(endCount + renewalCount);
+}
+
 function metricScore(item, conf, cat) {
   if (isRenewalRateMetric(cat)) return renewalRateScore(item);
+  if (isRenewalLtvMetric(cat)) return renewalLtvScore(item);
   return Number(item && item[conf.key] || 0);
 }
 
 function metricValueHtml(item, conf, cat) {
   var value = conf.fmt(item && item[conf.key]);
-  if (!isRenewalRateMetric(cat)) return value;
+  if (!isRenewalWeightedMetric(cat)) return value;
   return value + '<span class="rank-ratio">' + renewalRatio(item) + '</span>';
 }
 
@@ -2210,7 +2227,7 @@ var PROFILE_RANK_METRICS = [
   { label: '更新売上', monthlyCat: 'fan-sales', annualCat: 'a-fan-sales', value: function(s){ return fmtYenMan(s && s.renewalSales); }, sub: '更新売上' },
   { label: '更新率', monthlyCat: 'fan-rate', annualCat: 'a-fan-rate', value: function(s){ return fmtPct(s && s.renewalRate) + '<span class="rank-ratio">' + renewalRatio(s) + '</span>'; }, sub: '更新率' },
   { label: '更新数', monthlyCat: 'fan-count', annualCat: 'a-fan-count', value: function(s){ return Math.round(s && s.renewalCount || 0) + '件'; }, sub: '更新数' },
-  { label: '更新LTV', monthlyCat: 'fan-price', annualCat: 'a-fan-price', value: function(s){ return fmtYen(s && s.renewalLtv); }, sub: '更新LTV' },
+  { label: '更新LTV', monthlyCat: 'fan-price', annualCat: 'a-fan-price', value: function(s){ return fmtYen(s && s.renewalLtv) + '<span class="rank-ratio">' + renewalRatio(s) + '</span>'; }, sub: '更新LTV' },
   { label: '新規LTV', monthlyCat: 'new-price', annualCat: 'a-new-price', value: function(s){ return fmtYen(s && s.newLtv); }, sub: '新規LTV' },
   { label: '新規売上', monthlyCat: 'new-sales', annualCat: 'a-new-sales', value: function(s){ return fmtYenMan(s && s.newSales); }, sub: '新規売上' },
   { label: '回数券購入率', monthlyCat: 'new-ticket-rate', annualCat: 'a-new-ticket-rate', value: function(s){ return fmtPct(s && s.ticketPurchaseRate); }, sub: '回数券購入率' },

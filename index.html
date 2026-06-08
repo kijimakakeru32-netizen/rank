@@ -1744,8 +1744,8 @@ function parseStaffTable(table) {
     var name = cell(row, 1);
     if (!name || name === 'スタッフ名') return null;
     var offset = Number(cell(row, 2) || 0) < 1 && Number(cell(row, 3) || 0) > 1000 ? 1 : 0;
-    var renewalEndCountIndex = columnIndexByLabel(table, ['回数券終了数', '券終了数'], 10 + offset);
-    var renewalCountIndex = columnIndexByLabel(table, ['回数券更新数', '券更新数'], 13 + offset);
+    var renewalEndCountIndex = columnIndexByLabel(table, ['回数券終了数', '券終了数'], 9 + offset);
+    var renewalCountIndex = columnIndexByLabel(table, ['回数券更新数', '券更新数'], 10 + offset);
     var ticketPurchaseRateIndex = columnIndexByLabel(table, ['回数券購入率', '券購入率'], 14 + offset);
     var renewalRateIndex = columnIndexByLabel(table, ['回数券更新率', '券更新率'], 15 + offset);
     var renewalCount = Number(cell(row, renewalCountIndex) || 0);
@@ -1755,7 +1755,7 @@ function parseStaffTable(table) {
       totalSales: Number(cell(row, 2 + offset) || 0),
       newSales: Number(cell(row, 3 + offset) || 0),
       existingSales: Number(cell(row, 4 + offset) || 0),
-      renewalSales: Number(cell(row, 5 + offset) || 0),
+      renewalSales: Number(cell(row, 6 + offset) || 0),
       existingCount: Number(cell(row, 7 + offset) || 0),
       newCount: Number(cell(row, 8 + offset) || 0),
       renewalCount: renewalCount,

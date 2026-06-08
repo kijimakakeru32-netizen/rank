@@ -287,6 +287,11 @@ html,body{
   radial-gradient(circle at 24% 24%,rgba(255,255,255,.22),transparent 20%),
   linear-gradient(135deg,#0d0d1a,#e8184a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:42px;font-weight:900;font-family:'DM Sans',sans-serif;margin-bottom:12px}
 .learning-note{font-size:11px;color:var(--text3);line-height:1.7;margin-top:9px}
+.resource-actions{display:grid;gap:10px;margin-top:16px}
+.resource-btn{width:100%;border:0;border-radius:14px;padding:13px 14px;text-align:center;text-decoration:none;font-size:13px;font-weight:900;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.resource-btn.primary{background:linear-gradient(135deg,#0d0d1a,#4f3ef5);color:#fff;box-shadow:0 12px 24px rgba(79,62,245,.18)}
+.resource-btn.secondary{background:#fff;color:var(--text2);border:1px solid var(--border2)}
+.resource-help{font-size:11px;color:var(--text3);line-height:1.75;margin-top:12px}
 
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
 .sp{height:16px}
@@ -867,7 +872,7 @@ html,body{
       <div class="learning-section-sub">PDF</div>
     </div>
     <div class="learning-grid">
-      <a class="learning-card" href="assets/learning/representative-20260401-anatomy-bone-muscle.pdf" onclick="return openLearningLink(this)">
+      <a class="learning-card" href="assets/learning/representative-20260401-anatomy-bone-muscle.pdf" onclick="return openPdfResource(this)">
         <div class="learning-card-top">
           <div class="learning-icon">📘</div>
           <div><div class="learning-title">解剖学（骨・筋肉）</div><div class="learning-meta">2026.04.01</div></div>
@@ -875,7 +880,7 @@ html,body{
         <div class="learning-desc">整体師として身体を診る土台になる、骨・筋肉の基礎理解を整理します。</div>
         <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
       </a>
-      <a class="learning-card" href="assets/learning/representative-20260408-anatomy-viscera-nerve.pdf" onclick="return openLearningLink(this)">
+      <a class="learning-card" href="assets/learning/representative-20260408-anatomy-viscera-nerve.pdf" onclick="return openPdfResource(this)">
         <div class="learning-card-top">
           <div class="learning-icon">🧠</div>
           <div><div class="learning-title">解剖学（神経・内臓）</div><div class="learning-meta">2026.04.08</div></div>
@@ -883,7 +888,7 @@ html,body{
         <div class="learning-desc">神経・内臓の関係性を押さえ、不調の背景を立体的に捉えるための資料です。</div>
         <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
       </a>
-      <a class="learning-card" href="assets/learning/representative-20260415-physiology-neurophysiology.pdf" onclick="return openLearningLink(this)">
+      <a class="learning-card" href="assets/learning/representative-20260415-physiology-neurophysiology.pdf" onclick="return openPdfResource(this)">
         <div class="learning-card-top">
           <div class="learning-icon">⚡</div>
           <div><div class="learning-title">生理学・神経生理学</div><div class="learning-meta">2026.04.15</div></div>
@@ -891,7 +896,7 @@ html,body{
         <div class="learning-desc">身体反応・神経系の働きを理解し、施術説明の説得力を高めるための学習資料です。</div>
         <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
       </a>
-      <a class="learning-card" href="assets/learning/representative-20260429-kinesiology-principles.pdf" onclick="return openLearningLink(this)">
+      <a class="learning-card" href="assets/learning/representative-20260429-kinesiology-principles.pdf" onclick="return openPdfResource(this)">
         <div class="learning-card-top">
           <div class="learning-icon">🏃</div>
           <div><div class="learning-title">運動学の原理原則</div><div class="learning-meta">2026.04.29</div></div>
@@ -899,7 +904,7 @@ html,body{
         <div class="learning-desc">関節運動・動作分析の原理原則を押さえ、評価と施術の精度を高めます。</div>
         <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
       </a>
-      <a class="learning-card" href="assets/learning/representative-20260506-biomechanics.pdf" onclick="return openLearningLink(this)">
+      <a class="learning-card" href="assets/learning/representative-20260506-biomechanics.pdf" onclick="return openPdfResource(this)">
         <div class="learning-card-top">
           <div class="learning-icon">🧍</div>
           <div><div class="learning-title">バイオメカニクス</div><div class="learning-meta">2026.05.06</div></div>
@@ -907,7 +912,7 @@ html,body{
         <div class="learning-desc">姿勢や動作を力学的に捉え、施術の評価と説明に落とし込むための資料です。</div>
         <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
       </a>
-      <a class="learning-card" href="assets/learning/representative-20260520-breathing-posture.pdf" onclick="return openLearningLink(this)">
+      <a class="learning-card" href="assets/learning/representative-20260520-breathing-posture.pdf" onclick="return openPdfResource(this)">
         <div class="learning-card-top">
           <div class="learning-icon">🌬️</div>
           <div><div class="learning-title">呼吸と姿勢</div><div class="learning-meta">2026.05.20</div></div>
@@ -915,7 +920,7 @@ html,body{
         <div class="learning-desc">呼吸と姿勢の関係性を理解し、身体の見立てをより深めるための資料です。</div>
         <div class="learning-actions"><span class="learning-pill">PDFを開く</span><span class="learning-pill green">代表研修</span></div>
       </a>
-      <a class="learning-card" href="assets/learning/representative-20260603-symptom-breakdown.pdf" onclick="return openLearningLink(this)">
+      <a class="learning-card" href="assets/learning/representative-20260603-symptom-breakdown.pdf" onclick="return openPdfResource(this)">
         <div class="learning-card-top">
           <div class="learning-icon">🔍</div>
           <div><div class="learning-title">症状の分解（肩こり・腰痛）</div><div class="learning-meta">2026.06.03</div></div>
@@ -961,6 +966,25 @@ html,body{
   </section>
   <div class="sp"></div>
 </div><!-- /pg-learning -->
+
+<!-- ========== PAGE: PDF RESOURCE ========== -->
+<div class="pg" id="pg-pdf-resource">
+  <div class="ph"><div class="ph-title">研修資料</div><div class="ph-sub">PDF資料を開く</div></div>
+  <button class="news-back" type="button" onclick="backToLearningPage()">← 学習ページに戻る</button>
+  <div class="news-detail">
+    <article class="news-detail-card">
+      <div class="news-meta"><span class="news-badge">PDF</span><span class="news-date" id="pdf-resource-date">代表研修</span></div>
+      <div class="news-detail-title" id="pdf-resource-title">研修資料</div>
+      <div class="news-detail-body" id="pdf-resource-desc">PDF表示に対応していないブラウザでは、ダウンロードして閲覧してください。</div>
+      <div class="resource-actions">
+        <button class="resource-btn primary" type="button" onclick="openCurrentPdf()">PDFを開く</button>
+        <a class="resource-btn secondary" id="pdf-resource-download" href="#" download>PDFをダウンロード</a>
+      </div>
+      <div class="resource-help">PDFが白い画面になる場合は、下のダウンロードから端末のPDFビューアで開いてください。アプリに戻ってもログイン状態は保持されます。</div>
+    </article>
+  </div>
+  <div class="sp"></div>
+</div><!-- /pg-pdf-resource -->
 
 <!-- NAV -->
 <nav class="nav">
@@ -1017,6 +1041,42 @@ function openLearningLink(link) {
   var url = /^https?:\/\//.test(href) ? href : new URL(href, window.location.href).href;
   window.location.assign(url);
   return false;
+}
+
+var currentPdfUrl = '';
+
+function openPdfResource(link) {
+  var href = link && link.getAttribute('href');
+  if (!href) return false;
+  currentPdfUrl = new URL(href, window.location.href).href;
+  var title = link.querySelector('.learning-title');
+  var date = link.querySelector('.learning-meta');
+  var desc = link.querySelector('.learning-desc');
+  var titleEl = document.getElementById('pdf-resource-title');
+  var dateEl = document.getElementById('pdf-resource-date');
+  var descEl = document.getElementById('pdf-resource-desc');
+  var downloadEl = document.getElementById('pdf-resource-download');
+  if (titleEl) titleEl.textContent = title ? title.textContent : '研修資料';
+  if (dateEl) dateEl.textContent = date ? date.textContent : '代表研修';
+  if (descEl) descEl.textContent = desc ? desc.textContent : 'PDF表示に対応していないブラウザでは、ダウンロードして閲覧してください。';
+  if (downloadEl) {
+    downloadEl.href = currentPdfUrl;
+    downloadEl.setAttribute('download', (titleEl ? titleEl.textContent : '研修資料') + '.pdf');
+  }
+  openPageById('pg-pdf-resource');
+  return false;
+}
+
+function openCurrentPdf() {
+  if (!currentPdfUrl) return;
+  var viewerUrl = /^https?:\/\//.test(currentPdfUrl)
+    ? 'https://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(currentPdfUrl)
+    : currentPdfUrl;
+  window.location.assign(viewerUrl);
+}
+
+function backToLearningPage() {
+  openPageById('pg-learning');
 }
 
 // ── profile tabs ─────────────────────────────────────────────

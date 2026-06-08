@@ -376,6 +376,7 @@ html,body{
         <div class="stat-card"><div class="stat-badge up">▲2位</div><div class="stat-lbl">口コミランク</div><div class="stat-val" style="color:var(--bronze)">3<span class="stat-unit">位/17名</span></div><div class="stat-sub">平均<strong>★4.83</strong></div></div>
         <div class="stat-card"><div class="stat-lbl">更新数</div><div class="stat-val" style="color:var(--text)">42<span class="stat-unit">件</span></div><div class="stat-sub">先月<strong>38件</strong></div></div>
         <div class="stat-card"><div class="stat-lbl">更新売上</div><div class="stat-val" style="color:var(--text)">¥840,000</div><div class="stat-sub">全体<strong style="color:var(--silver)">2位</strong></div></div>
+        <div class="stat-card"><div class="stat-lbl">回数券購入率</div><div class="stat-val" style="color:var(--text)">0%</div><div class="stat-sub">ランク<strong>実績なし</strong></div></div>
       </div>
     </div>
 
@@ -389,6 +390,7 @@ html,body{
         <div class="hist-tab" onclick="switchHistChart(this,'fanPrice')">更新LTV</div>
         <div class="hist-tab" onclick="switchHistChart(this,'ltv')">新規LTV</div>
         <div class="hist-tab" onclick="switchHistChart(this,'newSales')">新規売上</div>
+        <div class="hist-tab" onclick="switchHistChart(this,'ticketRate')">回数券購入率</div>
         <div class="hist-tab" onclick="switchHistChart(this,'review')">口コミ</div>
       </div>
       <div class="card" style="padding:12px;position:relative;height:150px">
@@ -569,6 +571,7 @@ html,body{
       <div class="sub-tabs">
         <div class="sub-tab on" onclick="switchSubTab(this,'rl-m-new','new-price')">新規LTV</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-m-new','new-sales')">新規売上</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-m-new','new-ticket-rate')">回数券購入率</div>
       </div>
       <div class="rank-wrap">
         <input class="rank-search" type="text" placeholder="名前・店舗で絞り込み..." oninput="filterRank(this,'rl-m-new')">
@@ -645,6 +648,7 @@ html,body{
       <div class="sub-tabs">
         <div class="sub-tab on" onclick="switchSubTab(this,'rl-a-new','a-new-price')">新規LTV</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-a-new','a-new-sales')">新規売上</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-a-new','a-new-ticket-rate')">回数券購入率</div>
       </div>
       <div class="rank-wrap">
         <input class="rank-search" type="text" placeholder="名前・店舗で絞り込み..." oninput="filterRank(this,'rl-a-new')">
@@ -717,6 +721,7 @@ html,body{
       <div class="sub-tabs">
         <div class="sub-tab on" onclick="switchSubTab(this,'rl-store-m-new','store-new-price')">新規LTV</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-store-m-new','store-new-sales')">新規売上</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-store-m-new','store-new-ticket-rate')">回数券購入率</div>
       </div>
       <div class="rank-wrap">
         <input class="rank-search" type="text" placeholder="店舗名で絞り込み..." oninput="filterRank(this,'rl-store-m-new')">
@@ -783,6 +788,7 @@ html,body{
       <div class="sub-tabs">
         <div class="sub-tab on" onclick="switchSubTab(this,'rl-store-a-new','store-a-new-price')">新規LTV</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-store-a-new','store-a-new-sales')">新規売上</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-store-a-new','store-a-new-ticket-rate')">回数券購入率</div>
       </div>
       <div class="rank-wrap">
         <input class="rank-search" type="text" placeholder="店舗名で絞り込み..." oninput="filterRank(this,'rl-store-a-new')">
@@ -1562,6 +1568,28 @@ function cell(row, index) {
   return row && row.c && row.c[index] ? row.c[index].v : null;
 }
 
+function normalizeColumnLabel(label) {
+  return String(label || '').replace(/\s+/g, '').replace(/[（）()]/g, '').trim();
+}
+
+function columnIndexByLabel(table, labels, fallbackIndex) {
+  var targets = labels.map(normalizeColumnLabel);
+  var cols = (table && table.cols) || [];
+  for (var i = 0; i < cols.length; i++) {
+    var colLabel = normalizeColumnLabel((cols[i] && (cols[i].label || cols[i].id)) || '');
+    if (colLabel && targets.some(function(target) { return colLabel.indexOf(target) >= 0; })) return i;
+  }
+  var rows = (table && table.rows) || [];
+  for (var r = 0; r < Math.min(rows.length, 5); r++) {
+    var values = rowValues(rows[r]);
+    for (var c = 0; c < values.length; c++) {
+      var cellLabel = normalizeColumnLabel(values[c]);
+      if (cellLabel && targets.some(function(target) { return cellLabel.indexOf(target) >= 0; })) return c;
+    }
+  }
+  return fallbackIndex;
+}
+
 function rowValues(row) {
   return ((row && row.c) || []).map(function(c) {
     return c && c.v != null ? String(c.v).trim() : '';
@@ -1660,6 +1688,8 @@ function parseStaffTable(table) {
     var name = cell(row, 1);
     if (!name || name === 'スタッフ名') return null;
     var offset = Number(cell(row, 2) || 0) < 1 && Number(cell(row, 3) || 0) > 1000 ? 1 : 0;
+    var renewalCountIndex = columnIndexByLabel(table, ['回数券更新数', '券更新数'], 13 + offset);
+    var ticketPurchaseRateIndex = columnIndexByLabel(table, ['回数券購入率', '券購入率'], 14 + offset);
     return {
       name: resolveStaffDisplayName(name),
       totalSales: Number(cell(row, 2 + offset) || 0),
@@ -1668,10 +1698,10 @@ function parseStaffTable(table) {
       renewalSales: Number(cell(row, 5 + offset) || 0),
       existingCount: Number(cell(row, 7 + offset) || 0),
       newCount: Number(cell(row, 8 + offset) || 0),
-      renewalCount: Number(cell(row, 10 + offset) || 0),
+      renewalCount: Number(cell(row, renewalCountIndex) || 0),
       nextBookingRate: Number(cell(row, 11 + offset) || 0),
       repeatRate: Number(cell(row, 12 + offset) || 0),
-      ticketPurchaseRate: Number(cell(row, 14 + offset) || 0),
+      ticketPurchaseRate: Number(cell(row, ticketPurchaseRateIndex) || 0),
       renewalRate: Number(cell(row, 15 + offset) || 0),
       reviews: Number(cell(row, 16 + offset) || 0),
       ltv: Number(cell(row, 17 + offset) || 0),
@@ -1686,6 +1716,8 @@ function parseStaffTable(table) {
 function parseStoreTable(table) {
   var firstName = cell((table.rows || [])[0], 1);
   if (firstName === 'スタッフ名') return [];
+  var renewalCountIndex = columnIndexByLabel(table, ['回数券更新数', '券更新数'], 13);
+  var ticketPurchaseRateIndex = columnIndexByLabel(table, ['回数券購入率', '券購入率'], 14);
   return (table.rows || []).map(function(row) {
     var name = cell(row, 1);
     if (!name) return null;
@@ -1697,10 +1729,10 @@ function parseStoreTable(table) {
       renewalSales: Number(cell(row, 6) || 0),
       existingCount: Number(cell(row, 7) || 0),
       newCount: Number(cell(row, 8) || 0),
-      renewalCount: Number(cell(row, 10) || 0),
+      renewalCount: Number(cell(row, renewalCountIndex) || 0),
       nextBookingRate: Number(cell(row, 11) || 0),
       repeatRate: Number(cell(row, 12) || 0),
-      ticketPurchaseRate: Number(cell(row, 14) || 0),
+      ticketPurchaseRate: Number(cell(row, ticketPurchaseRateIndex) || 0),
       renewalRate: Number(cell(row, 15) || 0),
       reviews: Number(cell(row, 16) || 0),
       ltv: Number(cell(row, 17) || 0),
@@ -1871,12 +1903,14 @@ function metricConfig(cat) {
     'fan-price': { key: 'renewalLtv', fmt: fmtYen },
     'new-price': { key: 'newLtv', fmt: fmtYen },
     'new-sales': { key: 'newSales', fmt: fmtYenMan },
+    'new-ticket-rate': { key: 'ticketPurchaseRate', fmt: fmtPct },
     'a-fan-rate': { key: 'renewalRate', fmt: fmtPct },
     'a-fan-count': { key: 'renewalCount', fmt: function(v){ return Math.round(v) + '件'; } },
     'a-fan-sales': { key: 'renewalSales', fmt: fmtYenMan },
     'a-fan-price': { key: 'renewalLtv', fmt: fmtYen },
     'a-new-price': { key: 'newLtv', fmt: fmtYen },
     'a-new-sales': { key: 'newSales', fmt: fmtYenMan },
+    'a-new-ticket-rate': { key: 'ticketPurchaseRate', fmt: fmtPct },
     review: { key: 'reviews', fmt: function(v){ return Math.round(v) + '件'; } },
     'store-fan-rate': { key: 'renewalRate', fmt: fmtPct },
     'store-fan-count': { key: 'renewalCount', fmt: function(v){ return Math.round(v) + '件'; } },
@@ -1884,12 +1918,14 @@ function metricConfig(cat) {
     'store-fan-price': { key: 'renewalLtv', fmt: fmtYen },
     'store-new-price': { key: 'newLtv', fmt: fmtYen },
     'store-new-sales': { key: 'newSales', fmt: fmtYenMan },
+    'store-new-ticket-rate': { key: 'ticketPurchaseRate', fmt: fmtPct },
     'store-a-fan-rate': { key: 'renewalRate', fmt: fmtPct },
     'store-a-fan-count': { key: 'renewalCount', fmt: function(v){ return Math.round(v) + '件'; } },
     'store-a-fan-sales': { key: 'renewalSales', fmt: fmtYenMan },
     'store-a-fan-price': { key: 'renewalLtv', fmt: fmtYen },
     'store-a-new-price': { key: 'newLtv', fmt: fmtYen },
-    'store-a-new-sales': { key: 'newSales', fmt: fmtYenMan }
+    'store-a-new-sales': { key: 'newSales', fmt: fmtYenMan },
+    'store-a-new-ticket-rate': { key: 'ticketPurchaseRate', fmt: fmtPct }
   };
   return map[cat] || map.sales;
 }
@@ -1926,7 +1962,7 @@ function renderRankList(listId, items, cat, opts) {
   if (!list) return;
   var conf = metricConfig(cat);
   var currentName = opts && opts.currentName;
-  var rows = rankRows(items, cat).slice(0, 20);
+  var rows = rankRows(items, cat);
   var allZero = rows.every(function(item){ return Number(item[conf.key] || 0) === 0; });
   list.innerHTML = rows.map(function(item, index) {
     var value = Number(item[conf.key] || 0);
@@ -2025,6 +2061,7 @@ function renderSheetData(opts) {
     var totalRank = monthlyRankPosition(appData.staff, 'sales', currentStaff.name);
     var fanRank = monthlyRankPosition(appData.staff, 'fan-rate', currentStaff.name);
     var trustRank = monthlyRankPosition(appData.staff, 'new-price', currentStaff.name);
+    var ticketRank = monthlyRankPosition(appData.staff, 'new-ticket-rate', currentStaff.name);
     var reviewRank = monthlyRankPosition(appData.staff, 'review', currentStaff.name);
     if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">総合売上ランク</div><div class="stat-val" style="color:var(--bronze)">' + fmtRank(totalRank, appData.staff.length, '名') + '</div><div class="stat-sub">売上<strong>' + fmtYenMan(currentStaff.totalSales) + '</strong></div>';
     if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">ファン化ランク</div><div class="stat-val" style="color:var(--silver)">' + fmtRank(fanRank, appData.staff.length, '名') + '</div><div class="stat-sub">更新率<strong>' + fmtPct(currentStaff.renewalRate) + '</strong></div>';
@@ -2032,6 +2069,7 @@ function renderSheetData(opts) {
     if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">口コミランク</div><div class="stat-val" style="color:var(--bronze)">' + fmtRank(reviewRank, appData.staff.length, '名') + '</div><div class="stat-sub">口コミ<strong>' + Math.round(currentStaff.reviews) + '件</strong></div>';
     if (cards[4]) cards[4].innerHTML = '<div class="stat-lbl">更新数</div><div class="stat-val" style="color:var(--text)">' + Math.round(currentStaff.renewalCount) + '<span class="stat-unit">件</span></div><div class="stat-sub">既存数<strong>' + Math.round(currentStaff.existingCount) + '件</strong></div>';
     if (cards[5]) cards[5].innerHTML = '<div class="stat-lbl">更新売上</div><div class="stat-val" style="color:var(--text)">' + fmtYenMan(currentStaff.renewalSales) + '</div><div class="stat-sub">更新LTV<strong>' + fmtYen(currentStaff.renewalLtv) + '</strong></div>';
+    if (cards[6]) cards[6].innerHTML = '<div class="stat-lbl">回数券購入率</div><div class="stat-val" style="color:var(--text)">' + fmtPct(currentStaff.ticketPurchaseRate) + '</div><div class="stat-sub">ランク<strong>' + fmtRank(ticketRank, appData.staff.length, '名') + '</strong></div>';
     updateHistoryData(currentStaff);
     renderFanProfile(currentStaff);
     renderTrophyStatus(currentStaff);
@@ -2121,24 +2159,28 @@ var subData = {
   'fan-price':   ['¥24,000','¥22,500','¥20,000','¥18,800','¥17,200'],
   'new-price':   ['¥12,400','¥10,800','¥9,600','¥8,200','¥7,800'],
   'new-sales':   ['¥380,000','¥320,000','¥280,000','¥240,000','¥210,000'],
+  'new-ticket-rate': ['68.0%','64.0%','61.0%','58.0%','55.0%'],
   'a-fan-rate':  ['82.1%','79.4%','76.2%','73.0%','70.5%'],
   'a-fan-count': ['598件','554件','482件','430件','401件'],
   'a-fan-sales': ['¥11,400,000','¥10,200,000','¥9,600,000','¥8,800,000','¥8,200,000'],
   'a-fan-price': ['¥24,800','¥23,200','¥21,400','¥19,600','¥18,200'],
   'a-new-price': ['¥11,800','¥10,400','¥9,200','¥8,600','¥8,100'],
   'a-new-sales': ['¥4,400,000','¥3,920,000','¥3,600,000','¥3,300,000','¥3,080,000'],
+  'a-new-ticket-rate': ['66.0%','63.0%','60.0%','57.0%','54.0%'],
   'store-fan-rate': ['81.2%','78.6%','75.4%','73.8%','71.9%'],
   'store-fan-count': ['112件','108件','94件','88件','82件'],
   'store-fan-sales': ['¥2,140,000','¥2,080,000','¥1,720,000','¥1,680,000','¥1,620,000'],
   'store-fan-price': ['¥21,800','¥20,900','¥19,400','¥18,700','¥18,100'],
   'store-new-price': ['¥11,600','¥10,900','¥10,400','¥9,800','¥9,200'],
   'store-new-sales': ['¥960,000','¥920,000','¥880,000','¥760,000','¥680,000'],
+  'store-new-ticket-rate': ['70.0%','66.0%','63.0%','59.0%','56.0%'],
   'store-a-fan-rate': ['80.4%','78.9%','75.6%','73.2%'],
   'store-a-fan-count': ['1,284件','1,248件','1,096件','1,024件'],
   'store-a-fan-sales': ['¥24,800,000','¥24,200,000','¥20,800,000','¥19,800,000'],
   'store-a-fan-price': ['¥22,400','¥21,800','¥20,200','¥19,300'],
   'store-a-new-price': ['¥11,200','¥10,700','¥10,100'],
-  'store-a-new-sales': ['¥11,200,000','¥10,800,000','¥10,200,000']
+  'store-a-new-sales': ['¥11,200,000','¥10,800,000','¥10,200,000'],
+  'store-a-new-ticket-rate': ['68.0%','64.0%','61.0%']
 };
 var rankColors = ['var(--gold)','var(--silver)','var(--bronze)'];
 
@@ -2214,6 +2256,7 @@ var histMetricConfig = {
   fanPrice: { label: '更新LTV', color: '#c9920a', fmt: fmtYen, value: function(s){ return Number(s && s.renewalLtv || 0); } },
   ltv: { label: '新規LTV', color: '#8a5cf6', fmt: fmtYen, value: function(s){ return Number(s && s.newLtv || 0); } },
   newSales: { label: '新規売上', color: '#00a0b8', fmt: fmtYen, value: function(s){ return Number(s && s.newSales || 0); } },
+  ticketRate: { label: '回数券購入率', color: '#ff8a00', fmt: fmtPct, value: function(s){ return Number(s && s.ticketPurchaseRate || 0); } },
   review: { label: '口コミ', color: '#704020', fmt: function(v){ return Math.round(v) + '件'; }, value: function(s){ return Number(s && s.reviews || 0); } }
 };
 

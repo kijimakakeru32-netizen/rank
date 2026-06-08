@@ -1222,13 +1222,14 @@ var STAFF_PERFORMANCE_COLUMNS = {
   renewalCount: 11,
   nextBookingRate: 12,
   repeatRate: 13,
-  ticketPurchaseRate: 14,
+  ticketPurchaseRate: 15,
   renewalRate: 16,
   reviews: 17,
   ltv: 18,
   newLtv: 19,
   renewalLtv: 20,
-  workDays: 21
+  workDays: 21,
+  ticketPurchaseCount: 24
 };
 var ANNUAL_START = { year: 2026, month: 6 };
 var LOGIN_STORAGE_KEY = 'kotobukiPortalLoginUser';
@@ -1718,7 +1719,7 @@ function mergeStaffItems(items) {
       return;
     }
     var target = map[key];
-    ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','renewalEndCount','reviews','workDays'].forEach(function(field) {
+    ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','renewalEndCount','ticketPurchaseCount','reviews','workDays'].forEach(function(field) {
       target[field] = Number(target[field] || 0) + Number(item[field] || 0);
     });
     ['nextBookingRate','repeatRate','ticketPurchaseRate','renewalRate'].forEach(function(field) {
@@ -1789,6 +1790,7 @@ function parseStaffTable(table) {
       nextBookingRate: Number(cell(row, col.nextBookingRate) || 0),
       repeatRate: Number(cell(row, col.repeatRate) || 0),
       ticketPurchaseRate: Number(cell(row, ticketPurchaseRateIndex) || 0),
+      ticketPurchaseCount: Number(cell(row, col.ticketPurchaseCount) || 0),
       renewalRate: resolveRenewalRate(cell(row, renewalRateIndex), renewalCount, renewalEndCount),
       reviews: Number(cell(row, col.reviews) || 0),
       ltv: Number(cell(row, col.ltv) || 0),
@@ -1812,6 +1814,9 @@ function parseStoreTable(table) {
     if (!name) return null;
     var renewalCount = Number(cell(row, renewalCountIndex) || 0);
     var renewalEndCount = Number(cell(row, renewalEndCountIndex) || 0);
+    var ticketPurchaseRate = Number(cell(row, ticketPurchaseRateIndex) || 0);
+    var newCount = Number(cell(row, 8) || 0);
+    var ticketPurchaseCount = ticketPurchaseRate && newCount ? ticketPurchaseRate * newCount : 0;
     return {
       name: formatClinicName(name),
       totalSales: Number(cell(row, 2) || 0),
@@ -1819,12 +1824,13 @@ function parseStoreTable(table) {
       existingSales: Number(cell(row, 4) || 0),
       renewalSales: Number(cell(row, 6) || 0),
       existingCount: Number(cell(row, 7) || 0),
-      newCount: Number(cell(row, 8) || 0),
+      newCount: newCount,
       renewalCount: renewalCount,
       renewalEndCount: renewalEndCount,
       nextBookingRate: Number(cell(row, 11) || 0),
       repeatRate: Number(cell(row, 12) || 0),
-      ticketPurchaseRate: Number(cell(row, ticketPurchaseRateIndex) || 0),
+      ticketPurchaseRate: ticketPurchaseRate,
+      ticketPurchaseCount: ticketPurchaseCount,
       renewalRate: resolveRenewalRate(cell(row, renewalRateIndex), renewalCount, renewalEndCount),
       reviews: Number(cell(row, 16) || 0),
       ltv: Number(cell(row, 17) || 0),
@@ -1843,6 +1849,7 @@ function zeroStaffFrom(item) {
     renewalSales: 0,
     existingCount: 0,
     newCount: 0,
+    ticketPurchaseCount: 0,
     renewalCount: 0,
     renewalEndCount: 0,
     nextBookingRate: 0,
@@ -1996,7 +2003,7 @@ function makeAnnualAccumulator(item, isStore) {
 }
 
 function addAnnualItem(target, item) {
-  ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','renewalEndCount','reviews'].forEach(function(field) {
+  ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','ticketPurchaseCount','renewalCount','renewalEndCount','reviews'].forEach(function(field) {
     target[field] = Number(target[field] || 0) + Number(item[field] || 0);
   });
   if (Number(item.ticketPurchaseRate || 0) > 0 || hasPerformance(item)) {
@@ -2011,7 +2018,7 @@ function finalizeAnnualItem(item) {
   item.newLtv = item.newCount ? item.newSales / item.newCount : 0;
   item.renewalLtv = item.renewalCount ? item.renewalSales / item.renewalCount : 0;
   item.renewalRate = item.renewalEndCount ? item.renewalCount / item.renewalEndCount : 0;
-  item.ticketPurchaseRate = item._ticketRateMonths ? item._ticketRateSum / item._ticketRateMonths : 0;
+  item.ticketPurchaseRate = item.newCount ? item.ticketPurchaseCount / item.newCount : (item._ticketRateMonths ? item._ticketRateSum / item._ticketRateMonths : 0);
   return item;
 }
 
@@ -2074,8 +2081,24 @@ function isRenewalWeightedMetric(cat) {
   return isRenewalRateMetric(cat) || isRenewalLtvMetric(cat);
 }
 
+function isNewLtvMetric(cat) {
+  return /(^|-)new-price$/.test(String(cat || ''));
+}
+
+function isTicketPurchaseRateMetric(cat) {
+  return /(^|-)new-ticket-rate$/.test(String(cat || ''));
+}
+
+function isNewWeightedMetric(cat) {
+  return isNewLtvMetric(cat) || isTicketPurchaseRateMetric(cat);
+}
+
 function renewalRatio(item) {
   return Math.round(Number(item && item.renewalCount || 0)) + '/' + Math.round(Number(item && item.renewalEndCount || 0));
+}
+
+function newPurchaseRatio(item) {
+  return Math.round(Number(item && item.ticketPurchaseCount || 0)) + '/' + Math.round(Number(item && item.newCount || 0));
 }
 
 function renewalRateScore(item) {
@@ -2094,14 +2117,33 @@ function renewalLtvScore(item) {
   return ltv * Math.log1p(endCount + renewalCount);
 }
 
+function newLtvScore(item) {
+  var ltv = Number(item && item.newLtv || 0);
+  var newCount = Number(item && item.newCount || 0);
+  var purchaseCount = Number(item && item.ticketPurchaseCount || 0);
+  if (!ltv || !newCount || !purchaseCount) return 0;
+  return ltv * Math.log1p(newCount + purchaseCount);
+}
+
+function ticketPurchaseRateScore(item) {
+  var rate = Number(item && item.ticketPurchaseRate || 0);
+  var newCount = Number(item && item.newCount || 0);
+  var purchaseCount = Number(item && item.ticketPurchaseCount || 0);
+  if (!rate || !newCount || !purchaseCount) return 0;
+  return rate * (1 + Math.log1p(newCount + purchaseCount) / 2);
+}
+
 function metricScore(item, conf, cat) {
   if (isRenewalRateMetric(cat)) return renewalRateScore(item);
   if (isRenewalLtvMetric(cat)) return renewalLtvScore(item);
+  if (isNewLtvMetric(cat)) return newLtvScore(item);
+  if (isTicketPurchaseRateMetric(cat)) return ticketPurchaseRateScore(item);
   return Number(item && item[conf.key] || 0);
 }
 
 function metricValueHtml(item, conf, cat) {
   var value = conf.fmt(item && item[conf.key]);
+  if (isNewWeightedMetric(cat)) return value + '<span class="rank-ratio">' + newPurchaseRatio(item) + '</span>';
   if (!isRenewalWeightedMetric(cat)) return value;
   return value + '<span class="rank-ratio">' + renewalRatio(item) + '</span>';
 }
@@ -2228,9 +2270,9 @@ var PROFILE_RANK_METRICS = [
   { label: '更新率', monthlyCat: 'fan-rate', annualCat: 'a-fan-rate', value: function(s){ return fmtPct(s && s.renewalRate) + '<span class="rank-ratio">' + renewalRatio(s) + '</span>'; }, sub: '更新率' },
   { label: '更新数', monthlyCat: 'fan-count', annualCat: 'a-fan-count', value: function(s){ return Math.round(s && s.renewalCount || 0) + '件'; }, sub: '更新数' },
   { label: '更新LTV', monthlyCat: 'fan-price', annualCat: 'a-fan-price', value: function(s){ return fmtYen(s && s.renewalLtv) + '<span class="rank-ratio">' + renewalRatio(s) + '</span>'; }, sub: '更新LTV' },
-  { label: '新規LTV', monthlyCat: 'new-price', annualCat: 'a-new-price', value: function(s){ return fmtYen(s && s.newLtv); }, sub: '新規LTV' },
+  { label: '新規LTV', monthlyCat: 'new-price', annualCat: 'a-new-price', value: function(s){ return fmtYen(s && s.newLtv) + '<span class="rank-ratio">' + newPurchaseRatio(s) + '</span>'; }, sub: '新規LTV' },
   { label: '新規売上', monthlyCat: 'new-sales', annualCat: 'a-new-sales', value: function(s){ return fmtYenMan(s && s.newSales); }, sub: '新規売上' },
-  { label: '回数券購入率', monthlyCat: 'new-ticket-rate', annualCat: 'a-new-ticket-rate', value: function(s){ return fmtPct(s && s.ticketPurchaseRate); }, sub: '回数券購入率' },
+  { label: '回数券購入率', monthlyCat: 'new-ticket-rate', annualCat: 'a-new-ticket-rate', value: function(s){ return fmtPct(s && s.ticketPurchaseRate) + '<span class="rank-ratio">' + newPurchaseRatio(s) + '</span>'; }, sub: '回数券購入率' },
   { label: '口コミ', monthlyCat: 'review', annualCat: 'review', value: function(s){ return Math.round(s && s.reviews || 0) + '件'; }, sub: '口コミ' }
 ];
 
@@ -2255,7 +2297,7 @@ function renderProfileMetricGrid(selector, items, currentStaff, isAnnual) {
 }
 
 function hasPerformance(item) {
-  return !!item && ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','reviews','newLtv','renewalLtv','renewalRate'].some(function(field) {
+  return !!item && ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','ticketPurchaseCount','renewalCount','reviews','newLtv','renewalLtv','renewalRate'].some(function(field) {
     return Number(item[field] || 0) > 0;
   });
 }

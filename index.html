@@ -108,6 +108,7 @@ html,body{
 /* ── STAT GRID ── */
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:12px;position:relative}
+.stat-medal{position:absolute;top:9px;right:9px;font-size:18px;line-height:1;filter:drop-shadow(0 5px 10px rgba(15,15,40,.18))}
 .stat-lbl{font-size:10px;color:var(--text3);font-family:'DM Sans',sans-serif;font-weight:500;margin-bottom:5px}
 .stat-val{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:var(--text);line-height:1;letter-spacing:-.02em}
 .stat-unit{font-size:10px;color:var(--text3);margin-left:2px}
@@ -382,9 +383,10 @@ html,body{
       <div class="sec-hd">直近1年の成績</div>
       <div class="hist-tabs">
         <div class="hist-tab on" onclick="switchHistChart(this,'sales')">総合売上</div>
+        <div class="hist-tab" onclick="switchHistChart(this,'existingSales')">既存売上</div>
+        <div class="hist-tab" onclick="switchHistChart(this,'fanSales')">更新売上</div>
         <div class="hist-tab" onclick="switchHistChart(this,'fan')">更新率</div>
         <div class="hist-tab" onclick="switchHistChart(this,'fanCount')">更新数</div>
-        <div class="hist-tab" onclick="switchHistChart(this,'fanSales')">更新売上</div>
         <div class="hist-tab" onclick="switchHistChart(this,'fanPrice')">更新LTV</div>
         <div class="hist-tab" onclick="switchHistChart(this,'ltv')">新規LTV</div>
         <div class="hist-tab" onclick="switchHistChart(this,'newSales')">新規売上</div>
@@ -2167,6 +2169,46 @@ function rankColor(rank) {
   return 'var(--text)';
 }
 
+function rankMedal(rank) {
+  if (rank === 1) return '🥇';
+  if (rank === 2) return '🥈';
+  if (rank === 3) return '🥉';
+  return '';
+}
+
+var PROFILE_RANK_METRICS = [
+  { label: '総合売上', monthlyCat: 'sales', annualCat: 'sales', value: function(s){ return fmtYenMan(s && s.totalSales); }, sub: '総合売上' },
+  { label: '既存売上', monthlyCat: 'existing-sales', annualCat: 'a-existing-sales', value: function(s){ return fmtYenMan(s && s.existingSales); }, sub: '既存売上' },
+  { label: '更新売上', monthlyCat: 'fan-sales', annualCat: 'a-fan-sales', value: function(s){ return fmtYenMan(s && s.renewalSales); }, sub: '更新売上' },
+  { label: '更新率', monthlyCat: 'fan-rate', annualCat: 'a-fan-rate', value: function(s){ return fmtPct(s && s.renewalRate); }, sub: '更新率' },
+  { label: '更新数', monthlyCat: 'fan-count', annualCat: 'a-fan-count', value: function(s){ return Math.round(s && s.renewalCount || 0) + '件'; }, sub: '更新数' },
+  { label: '更新LTV', monthlyCat: 'fan-price', annualCat: 'a-fan-price', value: function(s){ return fmtYen(s && s.renewalLtv); }, sub: '更新LTV' },
+  { label: '新規LTV', monthlyCat: 'new-price', annualCat: 'a-new-price', value: function(s){ return fmtYen(s && s.newLtv); }, sub: '新規LTV' },
+  { label: '新規売上', monthlyCat: 'new-sales', annualCat: 'a-new-sales', value: function(s){ return fmtYenMan(s && s.newSales); }, sub: '新規売上' },
+  { label: '回数券購入率', monthlyCat: 'new-ticket-rate', annualCat: 'a-new-ticket-rate', value: function(s){ return fmtPct(s && s.ticketPurchaseRate); }, sub: '回数券購入率' },
+  { label: '口コミ', monthlyCat: 'review', annualCat: 'review', value: function(s){ return Math.round(s && s.reviews || 0) + '件'; }, sub: '口コミ' }
+];
+
+function profileMetricCard(metric, items, currentStaff, cat, isAnnual) {
+  var rank = currentStaff ? (isAnnual ? rankPosition(items, cat, currentStaff.name) : monthlyRankPosition(items, cat, currentStaff.name)) : null;
+  var medal = rankMedal(rank);
+  return '<div class="stat-card' + (isAnnual ? ' annual-card' : '') + '">' +
+    (medal ? '<div class="stat-medal">' + medal + '</div>' : '') +
+    '<div class="stat-lbl">' + escapeHtml((isAnnual ? '年間' : '') + metric.label + 'ランク') + '</div>' +
+    '<div class="stat-val" style="color:' + rankColor(rank) + '">' + fmtRank(rank, items.length, '名') + '</div>' +
+    annualKpiRows([[metric.sub, metric.value(currentStaff)]]) +
+    (isAnnual ? top10GapBadge(items, cat, currentStaff && currentStaff.name) : '') +
+    '</div>';
+}
+
+function renderProfileMetricGrid(selector, items, currentStaff, isAnnual) {
+  var grid = document.querySelector(selector);
+  if (!grid) return;
+  grid.innerHTML = PROFILE_RANK_METRICS.map(function(metric) {
+    return profileMetricCard(metric, items, currentStaff, isAnnual ? metric.annualCat : metric.monthlyCat, isAnnual);
+  }).join('');
+}
+
 function hasPerformance(item) {
   return !!item && ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','reviews','newLtv','renewalLtv','renewalRate'].some(function(field) {
     return Number(item[field] || 0) > 0;
@@ -2221,11 +2263,6 @@ function renderAnnualZeroData() {
   var stores = appData.annualStores.length ? appData.annualStores : annualZeroStores();
   var currentStaff = findLoggedStaff(staff) || staff[0] || null;
   var currentStore = stores[0] || null;
-  var totalRank = currentStaff ? rankPosition(staff, 'sales', currentStaff.name) : null;
-  var fanRank = currentStaff ? rankPosition(staff, 'a-fan-rate', currentStaff.name) : null;
-  var trustRank = currentStaff ? rankPosition(staff, 'a-new-price', currentStaff.name) : null;
-  var reviewRank = currentStaff ? rankPosition(staff, 'review', currentStaff.name) : null;
-
   var annualLabel = document.querySelector('#pt-annual .sum-lbl');
   var annualValue = document.querySelector('#pt-annual .sum-val');
   var annualSub = document.querySelector('#pt-annual .sum-sub');
@@ -2235,19 +2272,7 @@ function renderAnnualZeroData() {
   if (annualSub) annualSub.innerHTML = periodLabel + ' の取得済み月を累計・平均化';
   if (annualChange) annualChange.textContent = '当月シート更新時に自動反映';
 
-  var cards = document.querySelectorAll('#pt-annual .stat-card');
-  if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">年間総合売上ランク</div><div class="stat-val">' + fmtRank(totalRank, staff.length, '名') + '</div>' +
-    annualKpiRows([['総売上', fmtYen(currentStaff && currentStaff.totalSales)]]) +
-    top10GapBadge(staff, 'sales', currentStaff && currentStaff.name);
-  if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">年間ファン化ランク</div><div class="stat-val">' + fmtRank(fanRank, staff.length, '名') + '</div>' +
-    annualKpiRows([['平均更新率', fmtPct(currentStaff && currentStaff.renewalRate)], ['更新数', Math.round(currentStaff && currentStaff.renewalCount || 0) + '件'], ['更新売上', fmtYen(currentStaff && currentStaff.renewalSales)], ['更新LTV', fmtYen(currentStaff && currentStaff.renewalLtv)]]) +
-    top10GapBadge(staff, 'a-fan-rate', currentStaff && currentStaff.name);
-  if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">年間信頼獲得ランク</div><div class="stat-val">' + fmtRank(trustRank, staff.length, '名') + '</div>' +
-    annualKpiRows([['新規LTV', fmtYen(currentStaff && currentStaff.newLtv)], ['新規売上', fmtYen(currentStaff && currentStaff.newSales)], ['回数券購入率', fmtPct(currentStaff && currentStaff.ticketPurchaseRate)]]) +
-    top10GapBadge(staff, 'a-new-price', currentStaff && currentStaff.name);
-  if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">年間口コミランク</div><div class="stat-val">' + fmtRank(reviewRank, staff.length, '名') + '</div>' +
-    annualKpiRows([['口コミ総数', Math.round(currentStaff && currentStaff.reviews || 0) + '件']]) +
-    top10GapBadge(staff, 'review', currentStaff && currentStaff.name);
+  renderProfileMetricGrid('#pt-annual .stat-grid', staff, currentStaff, true);
 
   renderRankList('rl-a-sales', staff, 'sales', { currentName: currentStaff && currentStaff.name, unit: '名' });
   renderRankList('rl-a-existing', staff, rankMetricState['rl-a-existing'], { currentName: currentStaff && currentStaff.name, unit: '名' });
@@ -2279,19 +2304,7 @@ function renderSheetData(opts) {
 	        monthChange.textContent = '';
 	        monthChange.style.display = 'none';
 	      }
-	      var cards = document.querySelectorAll('#pt-monthly .stat-card');
-	      var totalRank = monthlyRankPosition(appData.staff, 'sales', currentStaff.name);
-	      var fanRank = monthlyRankPosition(appData.staff, 'fan-rate', currentStaff.name);
-	      var trustRank = monthlyRankPosition(appData.staff, 'new-price', currentStaff.name);
-	      var ticketRank = monthlyRankPosition(appData.staff, 'new-ticket-rate', currentStaff.name);
-	      var reviewRank = monthlyRankPosition(appData.staff, 'review', currentStaff.name);
-	      if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">総合売上ランク</div><div class="stat-val" style="color:' + rankColor(totalRank) + '">' + fmtRank(totalRank, appData.staff.length, '名') + '</div><div class="stat-sub">売上<strong>' + fmtYenMan(currentStaff.totalSales) + '</strong></div>';
-	      if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">ファン化ランク</div><div class="stat-val" style="color:' + rankColor(fanRank) + '">' + fmtRank(fanRank, appData.staff.length, '名') + '</div><div class="stat-sub">更新率<strong>' + fmtPct(currentStaff.renewalRate) + '</strong></div>';
-	      if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">信頼獲得ランク</div><div class="stat-val" style="color:' + rankColor(trustRank) + '">' + fmtRank(trustRank, appData.staff.length, '名') + '</div><div class="stat-sub">新規LTV<strong>' + fmtYen(currentStaff.newLtv) + '</strong></div>';
-	      if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">口コミランク</div><div class="stat-val" style="color:' + rankColor(reviewRank) + '">' + fmtRank(reviewRank, appData.staff.length, '名') + '</div><div class="stat-sub">口コミ<strong>' + Math.round(currentStaff.reviews) + '件</strong></div>';
-	      if (cards[4]) cards[4].innerHTML = '<div class="stat-lbl">更新数</div><div class="stat-val" style="color:var(--text)">' + Math.round(currentStaff.renewalCount) + '<span class="stat-unit">件</span></div><div class="stat-sub">既存数<strong>' + Math.round(currentStaff.existingCount) + '件</strong></div>';
-	      if (cards[5]) cards[5].innerHTML = '<div class="stat-lbl">更新売上</div><div class="stat-val" style="color:var(--text)">' + fmtYenMan(currentStaff.renewalSales) + '</div><div class="stat-sub">更新LTV<strong>' + fmtYen(currentStaff.renewalLtv) + '</strong></div>';
-	      if (cards[6]) cards[6].innerHTML = '<div class="stat-lbl">回数券購入率</div><div class="stat-val" style="color:var(--text)">' + fmtPct(currentStaff.ticketPurchaseRate) + '</div><div class="stat-sub">ランク<strong>' + fmtRank(ticketRank, appData.staff.length, '名') + '</strong></div>';
+	      renderProfileMetricGrid('#pt-monthly .stat-grid', appData.staff, currentStaff, false);
 	      updateHistoryData(currentStaff);
 	      renderTrophyStatus(currentStaff);
 	    }
@@ -2505,6 +2518,7 @@ var chartObj = null;
 window._chartMetric = 'sales';
 var histMetricConfig = {
   sales: { label: '総合売上', color: '#4f3ef5', fmt: fmtYen, value: function(s){ return Number(s && s.totalSales || 0); } },
+  existingSales: { label: '既存売上', color: '#2457c5', fmt: fmtYen, value: function(s){ return Number(s && s.existingSales || 0); } },
   fan: { label: '更新率', color: '#00a878', fmt: fmtPct, value: function(s){ return Number(s && s.renewalRate || 0); } },
   fanCount: { label: '更新数', color: '#1a7fd4', fmt: function(v){ return Math.round(v) + '件'; }, value: function(s){ return Number(s && s.renewalCount || 0); } },
   fanSales: { label: '更新売上', color: '#e040a0', fmt: fmtYen, value: function(s){ return Number(s && s.renewalSales || 0); } },

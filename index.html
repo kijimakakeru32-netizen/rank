@@ -1911,6 +1911,16 @@ function rankPosition(items, cat, name) {
   return rows.filter(function(item){ return Number(item[conf.key] || 0) > value; }).length + 1;
 }
 
+function monthlyRankPosition(items, cat, name) {
+  var rows = rankRows(items, cat);
+  var idx = rows.findIndex(function(item){ return item.name === name; });
+  if (idx < 0) return null;
+  var conf = metricConfig(cat);
+  var value = Number(rows[idx][conf.key] || 0);
+  if (value === 0) return rows.length;
+  return rows.filter(function(item){ return Number(item[conf.key] || 0) > value; }).length + 1;
+}
+
 function renderRankList(listId, items, cat, opts) {
   var list = document.getElementById(listId);
   if (!list) return;
@@ -2012,10 +2022,10 @@ function renderSheetData(opts) {
       monthChange.style.display = 'none';
     }
     var cards = document.querySelectorAll('#pt-monthly .stat-card');
-    var totalRank = rankPosition(appData.staff, 'sales', currentStaff.name);
-    var fanRank = rankPosition(appData.staff, 'fan-rate', currentStaff.name);
-    var trustRank = rankPosition(appData.staff, 'new-price', currentStaff.name);
-    var reviewRank = rankPosition(appData.staff, 'review', currentStaff.name);
+    var totalRank = monthlyRankPosition(appData.staff, 'sales', currentStaff.name);
+    var fanRank = monthlyRankPosition(appData.staff, 'fan-rate', currentStaff.name);
+    var trustRank = monthlyRankPosition(appData.staff, 'new-price', currentStaff.name);
+    var reviewRank = monthlyRankPosition(appData.staff, 'review', currentStaff.name);
     if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">総合売上ランク</div><div class="stat-val" style="color:var(--bronze)">' + fmtRank(totalRank, appData.staff.length, '名') + '</div><div class="stat-sub">売上<strong>' + fmtYenMan(currentStaff.totalSales) + '</strong></div>';
     if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">ファン化ランク</div><div class="stat-val" style="color:var(--silver)">' + fmtRank(fanRank, appData.staff.length, '名') + '</div><div class="stat-sub">更新率<strong>' + fmtPct(currentStaff.renewalRate) + '</strong></div>';
     if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">信頼獲得ランク</div><div class="stat-val" style="color:var(--text)">' + fmtRank(trustRank, appData.staff.length, '名') + '</div><div class="stat-sub">新規LTV<strong>' + fmtYen(currentStaff.newLtv) + '</strong></div>';

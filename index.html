@@ -519,9 +519,10 @@ html,body{
     <div class="rank-block">
       <div class="rank-block-hd"><span class="rank-block-icon">🔄</span><span class="rank-block-title">既存（リピーター）</span><span class="rank-block-sub">月間</span></div>
       <div class="sub-tabs">
-        <div class="sub-tab on" onclick="switchSubTab(this,'rl-m-existing','fan-rate')">更新率</div>
-        <div class="sub-tab" onclick="switchSubTab(this,'rl-m-existing','fan-count')">更新数</div>
+        <div class="sub-tab on" onclick="switchSubTab(this,'rl-m-existing','existing-sales')">既存売上</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-m-existing','fan-sales')">更新売上</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-m-existing','fan-rate')">更新率</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-m-existing','fan-count')">更新数</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-m-existing','fan-price')">更新LTV</div>
       </div>
       <div class="rank-wrap">
@@ -598,9 +599,10 @@ html,body{
     <div class="rank-block">
       <div class="rank-block-hd"><span class="rank-block-icon">🔄</span><span class="rank-block-title">既存（リピーター）</span><span class="rank-block-sub">年次</span></div>
       <div class="sub-tabs">
-        <div class="sub-tab on" onclick="switchSubTab(this,'rl-a-existing','a-fan-rate')">更新率</div>
-        <div class="sub-tab" onclick="switchSubTab(this,'rl-a-existing','a-fan-count')">更新数</div>
+        <div class="sub-tab on" onclick="switchSubTab(this,'rl-a-existing','a-existing-sales')">既存売上</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-a-existing','a-fan-sales')">更新売上</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-a-existing','a-fan-rate')">更新率</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-a-existing','a-fan-count')">更新数</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-a-existing','a-fan-price')">更新LTV</div>
       </div>
       <div class="rank-wrap">
@@ -672,9 +674,10 @@ html,body{
     <div class="rank-block">
       <div class="rank-block-hd"><span class="rank-block-icon">🔄</span><span class="rank-block-title">既存（リピーター）</span><span class="rank-block-sub">月間</span></div>
       <div class="sub-tabs">
-        <div class="sub-tab on" onclick="switchSubTab(this,'rl-store-m-existing','store-fan-rate')">更新率</div>
-        <div class="sub-tab" onclick="switchSubTab(this,'rl-store-m-existing','store-fan-count')">更新数</div>
+        <div class="sub-tab on" onclick="switchSubTab(this,'rl-store-m-existing','store-existing-sales')">既存売上</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-store-m-existing','store-fan-sales')">更新売上</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-store-m-existing','store-fan-rate')">更新率</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-store-m-existing','store-fan-count')">更新数</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-store-m-existing','store-fan-price')">更新LTV</div>
       </div>
       <div class="rank-wrap">
@@ -740,9 +743,10 @@ html,body{
     <div class="rank-block">
       <div class="rank-block-hd"><span class="rank-block-icon">🔄</span><span class="rank-block-title">既存（リピーター）</span><span class="rank-block-sub">年次</span></div>
       <div class="sub-tabs">
-        <div class="sub-tab on" onclick="switchSubTab(this,'rl-store-a-existing','store-a-fan-rate')">更新率</div>
-        <div class="sub-tab" onclick="switchSubTab(this,'rl-store-a-existing','store-a-fan-count')">更新数</div>
+        <div class="sub-tab on" onclick="switchSubTab(this,'rl-store-a-existing','store-a-existing-sales')">既存売上</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-store-a-existing','store-a-fan-sales')">更新売上</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-store-a-existing','store-a-fan-rate')">更新率</div>
+        <div class="sub-tab" onclick="switchSubTab(this,'rl-store-a-existing','store-a-fan-count')">更新数</div>
         <div class="sub-tab" onclick="switchSubTab(this,'rl-store-a-existing','store-a-fan-price')">更新LTV</div>
       </div>
       <div class="rank-wrap">
@@ -1204,6 +1208,25 @@ var annualLoadSeq = 0;
 var SHEET_REFRESH_INTERVAL_MS = 30000;
 var sheetAutoRefreshTimer = null;
 var STAFF_SHEET_LAST_ROW = 72;
+var STAFF_PERFORMANCE_COLUMNS = {
+  totalSales: 3,
+  newSales: 4,
+  existingSales: 5,
+  renewalSales: 7,
+  existingCount: 8,
+  newCount: 9,
+  renewalEndCount: 10,
+  renewalCount: 11,
+  nextBookingRate: 12,
+  repeatRate: 13,
+  ticketPurchaseRate: 14,
+  renewalRate: 16,
+  reviews: 17,
+  ltv: 18,
+  newLtv: 19,
+  renewalLtv: 20,
+  workDays: 21
+};
 var ANNUAL_START = { year: 2026, month: 6 };
 var LOGIN_STORAGE_KEY = 'kotobukiPortalLoginUser';
 var DEFAULT_STAFF_NAMES = ['田中 美咲', '山本 健太', '佐藤 裕子', '鈴木 拓也', '高橋 あかり'];
@@ -1221,13 +1244,13 @@ var STAFF_NAME_ALIASES = {
   '佐瀨': '佐瀨 敢太'
 };
 var rankMetricState = {
-  'rl-m-existing': 'fan-rate',
+  'rl-m-existing': 'existing-sales',
   'rl-m-new': 'new-price',
-  'rl-a-existing': 'a-fan-rate',
+  'rl-a-existing': 'a-existing-sales',
   'rl-a-new': 'a-new-price',
-  'rl-store-m-existing': 'store-fan-rate',
+  'rl-store-m-existing': 'store-existing-sales',
   'rl-store-m-new': 'store-new-price',
-  'rl-store-a-existing': 'store-a-fan-rate',
+  'rl-store-a-existing': 'store-a-existing-sales',
   'rl-store-a-new': 'store-a-new-price'
 };
 
@@ -1743,32 +1766,32 @@ function parseStaffTable(table) {
   var rows = (table.rows || []).slice(0, STAFF_SHEET_LAST_ROW).map(function(row) {
     var name = cell(row, 1);
     if (!name || name === 'スタッフ名') return null;
-    var offset = Number(cell(row, 2) || 0) < 1 && Number(cell(row, 3) || 0) > 1000 ? 1 : 0;
-    var renewalEndCountIndex = columnIndexByLabel(table, ['回数券終了数', '券終了数'], 9 + offset);
-    var renewalCountIndex = columnIndexByLabel(table, ['回数券更新数', '券更新数'], 10 + offset);
-    var ticketPurchaseRateIndex = columnIndexByLabel(table, ['回数券購入率', '券購入率'], 14 + offset);
-    var renewalRateIndex = columnIndexByLabel(table, ['回数券更新率', '券更新率'], 15 + offset);
+    var col = STAFF_PERFORMANCE_COLUMNS;
+    var renewalEndCountIndex = col.renewalEndCount;
+    var renewalCountIndex = col.renewalCount;
+    var ticketPurchaseRateIndex = col.ticketPurchaseRate;
+    var renewalRateIndex = col.renewalRate;
     var renewalCount = Number(cell(row, renewalCountIndex) || 0);
     var renewalEndCount = Number(cell(row, renewalEndCountIndex) || 0);
     return {
       name: resolveStaffDisplayName(name),
-      totalSales: Number(cell(row, 2 + offset) || 0),
-      newSales: Number(cell(row, 3 + offset) || 0),
-      existingSales: Number(cell(row, 4 + offset) || 0),
-      renewalSales: Number(cell(row, 6 + offset) || 0),
-      existingCount: Number(cell(row, 7 + offset) || 0),
-      newCount: Number(cell(row, 8 + offset) || 0),
+      totalSales: Number(cell(row, col.totalSales) || 0),
+      newSales: Number(cell(row, col.newSales) || 0),
+      existingSales: Number(cell(row, col.existingSales) || 0),
+      renewalSales: Number(cell(row, col.renewalSales) || 0),
+      existingCount: Number(cell(row, col.existingCount) || 0),
+      newCount: Number(cell(row, col.newCount) || 0),
       renewalCount: renewalCount,
       renewalEndCount: renewalEndCount,
-      nextBookingRate: Number(cell(row, 11 + offset) || 0),
-      repeatRate: Number(cell(row, 12 + offset) || 0),
+      nextBookingRate: Number(cell(row, col.nextBookingRate) || 0),
+      repeatRate: Number(cell(row, col.repeatRate) || 0),
       ticketPurchaseRate: Number(cell(row, ticketPurchaseRateIndex) || 0),
       renewalRate: resolveRenewalRate(cell(row, renewalRateIndex), renewalCount, renewalEndCount),
-      reviews: Number(cell(row, 16 + offset) || 0),
-      ltv: Number(cell(row, 17 + offset) || 0),
-      newLtv: Number(cell(row, 18 + offset) || 0),
-      renewalLtv: Number(cell(row, 19 + offset) || 0),
-      workDays: Number(cell(row, 21 + offset) || 0)
+      reviews: Number(cell(row, col.reviews) || 0),
+      ltv: Number(cell(row, col.ltv) || 0),
+      newLtv: Number(cell(row, col.newLtv) || 0),
+      renewalLtv: Number(cell(row, col.renewalLtv) || 0),
+      workDays: Number(cell(row, col.workDays) || 0)
     };
   }).filter(Boolean);
   return mergeStaffItems(rows);
@@ -2039,6 +2062,7 @@ function escapeHtml(str) {
 function metricConfig(cat) {
   var map = {
     sales: { key: 'totalSales', fmt: fmtYenMan },
+    'existing-sales': { key: 'existingSales', fmt: fmtYenMan },
     'fan-rate': { key: 'renewalRate', fmt: fmtPct },
     'fan-count': { key: 'renewalCount', fmt: function(v){ return Math.round(v) + '件'; } },
     'fan-sales': { key: 'renewalSales', fmt: fmtYenMan },
@@ -2046,6 +2070,7 @@ function metricConfig(cat) {
     'new-price': { key: 'newLtv', fmt: fmtYen },
     'new-sales': { key: 'newSales', fmt: fmtYenMan },
     'new-ticket-rate': { key: 'ticketPurchaseRate', fmt: fmtPct },
+    'a-existing-sales': { key: 'existingSales', fmt: fmtYenMan },
     'a-fan-rate': { key: 'renewalRate', fmt: fmtPct },
     'a-fan-count': { key: 'renewalCount', fmt: function(v){ return Math.round(v) + '件'; } },
     'a-fan-sales': { key: 'renewalSales', fmt: fmtYenMan },
@@ -2054,6 +2079,7 @@ function metricConfig(cat) {
     'a-new-sales': { key: 'newSales', fmt: fmtYenMan },
     'a-new-ticket-rate': { key: 'ticketPurchaseRate', fmt: fmtPct },
     review: { key: 'reviews', fmt: function(v){ return Math.round(v) + '件'; } },
+    'store-existing-sales': { key: 'existingSales', fmt: fmtYenMan },
     'store-fan-rate': { key: 'renewalRate', fmt: fmtPct },
     'store-fan-count': { key: 'renewalCount', fmt: function(v){ return Math.round(v) + '件'; } },
     'store-fan-sales': { key: 'renewalSales', fmt: fmtYenMan },
@@ -2061,6 +2087,7 @@ function metricConfig(cat) {
     'store-new-price': { key: 'newLtv', fmt: fmtYen },
     'store-new-sales': { key: 'newSales', fmt: fmtYenMan },
     'store-new-ticket-rate': { key: 'ticketPurchaseRate', fmt: fmtPct },
+    'store-a-existing-sales': { key: 'existingSales', fmt: fmtYenMan },
     'store-a-fan-rate': { key: 'renewalRate', fmt: fmtPct },
     'store-a-fan-count': { key: 'renewalCount', fmt: function(v){ return Math.round(v) + '件'; } },
     'store-a-fan-sales': { key: 'renewalSales', fmt: fmtYenMan },
@@ -2370,6 +2397,7 @@ function loadMonthlySheetData(opts) {
 
 // ── sub-tab (ranking categories) ─────────────────────────────
 var subData = {
+  'existing-sales': ['¥1,120,000','¥1,060,000','¥980,000','¥920,000','¥880,000'],
   'fan-rate':    ['84.2%','80.1%','78.4%','75.0%','72.3%'],
   'fan-count':   ['52件','48件','42件','38件','35件'],
   'fan-sales':   ['¥960,000','¥900,000','¥840,000','¥780,000','¥710,000'],
@@ -2377,6 +2405,7 @@ var subData = {
   'new-price':   ['¥12,400','¥10,800','¥9,600','¥8,200','¥7,800'],
   'new-sales':   ['¥380,000','¥320,000','¥280,000','¥240,000','¥210,000'],
   'new-ticket-rate': ['68.0%','64.0%','61.0%','58.0%','55.0%'],
+  'a-existing-sales': ['¥13,200,000','¥12,600,000','¥11,800,000','¥11,000,000','¥10,400,000'],
   'a-fan-rate':  ['82.1%','79.4%','76.2%','73.0%','70.5%'],
   'a-fan-count': ['598件','554件','482件','430件','401件'],
   'a-fan-sales': ['¥11,400,000','¥10,200,000','¥9,600,000','¥8,800,000','¥8,200,000'],
@@ -2384,6 +2413,7 @@ var subData = {
   'a-new-price': ['¥11,800','¥10,400','¥9,200','¥8,600','¥8,100'],
   'a-new-sales': ['¥4,400,000','¥3,920,000','¥3,600,000','¥3,300,000','¥3,080,000'],
   'a-new-ticket-rate': ['66.0%','63.0%','60.0%','57.0%','54.0%'],
+  'store-existing-sales': ['¥2,880,000','¥2,720,000','¥2,560,000','¥2,410,000','¥2,300,000'],
   'store-fan-rate': ['81.2%','78.6%','75.4%','73.8%','71.9%'],
   'store-fan-count': ['112件','108件','94件','88件','82件'],
   'store-fan-sales': ['¥2,140,000','¥2,080,000','¥1,720,000','¥1,680,000','¥1,620,000'],
@@ -2391,6 +2421,7 @@ var subData = {
   'store-new-price': ['¥11,600','¥10,900','¥10,400','¥9,800','¥9,200'],
   'store-new-sales': ['¥960,000','¥920,000','¥880,000','¥760,000','¥680,000'],
   'store-new-ticket-rate': ['70.0%','66.0%','63.0%','59.0%','56.0%'],
+  'store-a-existing-sales': ['¥32,400,000','¥31,200,000','¥29,800,000','¥28,600,000'],
   'store-a-fan-rate': ['80.4%','78.9%','75.6%','73.2%'],
   'store-a-fan-count': ['1,284件','1,248件','1,096件','1,024件'],
   'store-a-fan-sales': ['¥24,800,000','¥24,200,000','¥20,800,000','¥19,800,000'],

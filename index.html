@@ -2160,6 +2160,13 @@ function fmtRank(rank, total, unit) {
   return rank ? rank + '<span class="stat-unit">位/' + total + unit + '</span>' : '<span class="stat-unit">実績なし</span>';
 }
 
+function rankColor(rank) {
+  if (rank === 1) return 'var(--gold)';
+  if (rank === 2) return 'var(--silver)';
+  if (rank === 3) return 'var(--bronze)';
+  return 'var(--text)';
+}
+
 function hasPerformance(item) {
   return !!item && ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','reviews','newLtv','renewalLtv','renewalRate'].some(function(field) {
     return Number(item[field] || 0) > 0;
@@ -2278,10 +2285,10 @@ function renderSheetData(opts) {
 	      var trustRank = monthlyRankPosition(appData.staff, 'new-price', currentStaff.name);
 	      var ticketRank = monthlyRankPosition(appData.staff, 'new-ticket-rate', currentStaff.name);
 	      var reviewRank = monthlyRankPosition(appData.staff, 'review', currentStaff.name);
-	      if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">総合売上ランク</div><div class="stat-val" style="color:var(--bronze)">' + fmtRank(totalRank, appData.staff.length, '名') + '</div><div class="stat-sub">売上<strong>' + fmtYenMan(currentStaff.totalSales) + '</strong></div>';
-	      if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">ファン化ランク</div><div class="stat-val" style="color:var(--silver)">' + fmtRank(fanRank, appData.staff.length, '名') + '</div><div class="stat-sub">更新率<strong>' + fmtPct(currentStaff.renewalRate) + '</strong></div>';
-	      if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">信頼獲得ランク</div><div class="stat-val" style="color:var(--text)">' + fmtRank(trustRank, appData.staff.length, '名') + '</div><div class="stat-sub">新規LTV<strong>' + fmtYen(currentStaff.newLtv) + '</strong></div>';
-	      if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">口コミランク</div><div class="stat-val" style="color:var(--bronze)">' + fmtRank(reviewRank, appData.staff.length, '名') + '</div><div class="stat-sub">口コミ<strong>' + Math.round(currentStaff.reviews) + '件</strong></div>';
+	      if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">総合売上ランク</div><div class="stat-val" style="color:' + rankColor(totalRank) + '">' + fmtRank(totalRank, appData.staff.length, '名') + '</div><div class="stat-sub">売上<strong>' + fmtYenMan(currentStaff.totalSales) + '</strong></div>';
+	      if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">ファン化ランク</div><div class="stat-val" style="color:' + rankColor(fanRank) + '">' + fmtRank(fanRank, appData.staff.length, '名') + '</div><div class="stat-sub">更新率<strong>' + fmtPct(currentStaff.renewalRate) + '</strong></div>';
+	      if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">信頼獲得ランク</div><div class="stat-val" style="color:' + rankColor(trustRank) + '">' + fmtRank(trustRank, appData.staff.length, '名') + '</div><div class="stat-sub">新規LTV<strong>' + fmtYen(currentStaff.newLtv) + '</strong></div>';
+	      if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">口コミランク</div><div class="stat-val" style="color:' + rankColor(reviewRank) + '">' + fmtRank(reviewRank, appData.staff.length, '名') + '</div><div class="stat-sub">口コミ<strong>' + Math.round(currentStaff.reviews) + '件</strong></div>';
 	      if (cards[4]) cards[4].innerHTML = '<div class="stat-lbl">更新数</div><div class="stat-val" style="color:var(--text)">' + Math.round(currentStaff.renewalCount) + '<span class="stat-unit">件</span></div><div class="stat-sub">既存数<strong>' + Math.round(currentStaff.existingCount) + '件</strong></div>';
 	      if (cards[5]) cards[5].innerHTML = '<div class="stat-lbl">更新売上</div><div class="stat-val" style="color:var(--text)">' + fmtYenMan(currentStaff.renewalSales) + '</div><div class="stat-sub">更新LTV<strong>' + fmtYen(currentStaff.renewalLtv) + '</strong></div>';
 	      if (cards[6]) cards[6].innerHTML = '<div class="stat-lbl">回数券購入率</div><div class="stat-val" style="color:var(--text)">' + fmtPct(currentStaff.ticketPurchaseRate) + '</div><div class="stat-sub">ランク<strong>' + fmtRank(ticketRank, appData.staff.length, '名') + '</strong></div>';

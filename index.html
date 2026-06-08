@@ -227,6 +227,7 @@ html,body{
 .rank-you{font-size:9px;font-family:'DM Sans',sans-serif;font-weight:700;color:var(--accent);background:rgba(79,62,245,.09);padding:1px 5px;border-radius:4px;flex-shrink:0}
 .rank-val-wrap{text-align:right;flex-shrink:0}
 .rank-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;line-height:1}
+.rank-ratio{display:inline-block;margin-left:6px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:var(--text3);vertical-align:baseline}
 .rank-chg{font-size:9px;font-family:'DM Sans',sans-serif;font-weight:600;margin-top:1px}
 .rank-chg.up{color:var(--teal)}.rank-chg.dn{color:var(--coral)}.rank-chg.eq{color:var(--text3)}
 .rank-scroll-hint{text-align:center;font-size:10px;color:var(--text3);padding:5px;font-family:'DM Sans',sans-serif}
@@ -2061,6 +2062,33 @@ function escapeHtml(str) {
   });
 }
 
+function isRenewalRateMetric(cat) {
+  return /(^|-)fan-rate$/.test(String(cat || ''));
+}
+
+function renewalRatio(item) {
+  return Math.round(Number(item && item.renewalCount || 0)) + '/' + Math.round(Number(item && item.renewalEndCount || 0));
+}
+
+function renewalRateScore(item) {
+  var rate = Number(item && item.renewalRate || 0);
+  var renewalCount = Number(item && item.renewalCount || 0);
+  var endCount = Number(item && item.renewalEndCount || 0);
+  if (!rate || !endCount) return 0;
+  return rate * (1 + Math.log1p(endCount + renewalCount) / 2);
+}
+
+function metricScore(item, conf, cat) {
+  if (isRenewalRateMetric(cat)) return renewalRateScore(item);
+  return Number(item && item[conf.key] || 0);
+}
+
+function metricValueHtml(item, conf, cat) {
+  var value = conf.fmt(item && item[conf.key]);
+  if (!isRenewalRateMetric(cat)) return value;
+  return value + '<span class="rank-ratio">' + renewalRatio(item) + '</span>';
+}
+
 function metricConfig(cat) {
   var map = {
     sales: { key: 'totalSales', fmt: fmtYenMan },
@@ -2104,7 +2132,7 @@ function metricConfig(cat) {
 function rankRows(items, cat) {
   var conf = metricConfig(cat);
   return items.slice().sort(function(a, b) {
-    return Number(b[conf.key] || 0) - Number(a[conf.key] || 0);
+    return metricScore(b, conf, cat) - metricScore(a, conf, cat);
   });
 }
 
@@ -2113,9 +2141,9 @@ function rankPosition(items, cat, name) {
   var idx = rows.findIndex(function(item){ return item.name === name; });
   if (idx < 0) return null;
   var conf = metricConfig(cat);
-  var value = Number(rows[idx][conf.key] || 0);
+  var value = metricScore(rows[idx], conf, cat);
   if (value === 0) return null;
-  return rows.filter(function(item){ return Number(item[conf.key] || 0) > value; }).length + 1;
+  return rows.filter(function(item){ return metricScore(item, conf, cat) > value; }).length + 1;
 }
 
 function monthlyRankPosition(items, cat, name) {
@@ -2123,9 +2151,9 @@ function monthlyRankPosition(items, cat, name) {
   var idx = rows.findIndex(function(item){ return item.name === name; });
   if (idx < 0) return null;
   var conf = metricConfig(cat);
-  var value = Number(rows[idx][conf.key] || 0);
+  var value = metricScore(rows[idx], conf, cat);
   if (value === 0) return rows.length;
-  return rows.filter(function(item){ return Number(item[conf.key] || 0) > value; }).length + 1;
+  return rows.filter(function(item){ return metricScore(item, conf, cat) > value; }).length + 1;
 }
 
 function renderRankList(listId, items, cat, opts) {
@@ -2134,10 +2162,10 @@ function renderRankList(listId, items, cat, opts) {
   var conf = metricConfig(cat);
   var currentName = opts && opts.currentName;
   var rows = rankRows(items, cat);
-  var allZero = rows.every(function(item){ return Number(item[conf.key] || 0) === 0; });
+  var allZero = rows.every(function(item){ return metricScore(item, conf, cat) === 0; });
   list.innerHTML = rows.map(function(item, index) {
-    var value = Number(item[conf.key] || 0);
-    var rank = allZero ? null : rows.filter(function(other){ return Number(other[conf.key] || 0) > value; }).length + 1;
+    var value = metricScore(item, conf, cat);
+    var rank = allZero ? null : rows.filter(function(other){ return metricScore(other, conf, cat) > value; }).length + 1;
     var cls = rank && rank <= 3 ? ' r' + rank : '';
     var me = currentName && item.name === currentName;
     var medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
@@ -2148,7 +2176,7 @@ function renderRankList(listId, items, cat, opts) {
       '<div class="rank-av" style="background:linear-gradient(135deg,#4f3ef5,#1a7fd4)">' + escapeHtml(item.name.charAt(0)) + '</div>' +
       '<div class="rank-info"><div class="rank-name">' + escapeHtml(item.name) + '</div></div>' +
       (me ? '<div class="rank-you">' + (opts && opts.meLabel ? opts.meLabel : 'YOU') + '</div>' : '') +
-      '<div class="rank-val-wrap"><div class="rank-val" style="color:' + color + '">' + conf.fmt(item[conf.key]) + '</div></div>' +
+      '<div class="rank-val-wrap"><div class="rank-val" style="color:' + color + '">' + metricValueHtml(item, conf, cat) + '</div></div>' +
       '</div>';
   }).join('');
   var total = document.getElementById(listId + '-total');
@@ -2180,7 +2208,7 @@ var PROFILE_RANK_METRICS = [
   { label: '総合売上', monthlyCat: 'sales', annualCat: 'sales', value: function(s){ return fmtYenMan(s && s.totalSales); }, sub: '総合売上' },
   { label: '既存売上', monthlyCat: 'existing-sales', annualCat: 'a-existing-sales', value: function(s){ return fmtYenMan(s && s.existingSales); }, sub: '既存売上' },
   { label: '更新売上', monthlyCat: 'fan-sales', annualCat: 'a-fan-sales', value: function(s){ return fmtYenMan(s && s.renewalSales); }, sub: '更新売上' },
-  { label: '更新率', monthlyCat: 'fan-rate', annualCat: 'a-fan-rate', value: function(s){ return fmtPct(s && s.renewalRate); }, sub: '更新率' },
+  { label: '更新率', monthlyCat: 'fan-rate', annualCat: 'a-fan-rate', value: function(s){ return fmtPct(s && s.renewalRate) + '<span class="rank-ratio">' + renewalRatio(s) + '</span>'; }, sub: '更新率' },
   { label: '更新数', monthlyCat: 'fan-count', annualCat: 'a-fan-count', value: function(s){ return Math.round(s && s.renewalCount || 0) + '件'; }, sub: '更新数' },
   { label: '更新LTV', monthlyCat: 'fan-price', annualCat: 'a-fan-price', value: function(s){ return fmtYen(s && s.renewalLtv); }, sub: '更新LTV' },
   { label: '新規LTV', monthlyCat: 'new-price', annualCat: 'a-new-price', value: function(s){ return fmtYen(s && s.newLtv); }, sub: '新規LTV' },
@@ -2224,11 +2252,11 @@ function top10GapInfo(items, cat, name) {
   var rows = rankRows(items || [], cat);
   var current = rows.find(function(item) { return item.name === name; });
   if (!current || !rows.length) return { html: '実績なし', inTop10: false };
-  if (rows.every(function(item) { return Number(item[conf.key] || 0) === 0; })) return { html: '実績なし', inTop10: false };
+  if (rows.every(function(item) { return metricScore(item, conf, cat) === 0; })) return { html: '実績なし', inTop10: false };
   var value = Number(current[conf.key] || 0);
   var top10Index = Math.min(9, rows.length - 1);
   var top10Threshold = Number(rows[top10Index] && rows[top10Index][conf.key] || 0);
-  if (value === 0) {
+  if (metricScore(current, conf, cat) === 0) {
     if (top10Threshold <= 0) return { html: '実績なし', inTop10: false };
     return { html: 'Top10まであと ' + formatGapValue(top10Threshold, cat), inTop10: false };
   }

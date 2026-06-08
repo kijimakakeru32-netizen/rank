@@ -1621,7 +1621,7 @@ function mergeStaffItems(items) {
       return;
     }
     var target = map[key];
-    ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','reviews','workDays'].forEach(function(field) {
+    ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','renewalEndCount','reviews','workDays'].forEach(function(field) {
       target[field] = Number(target[field] || 0) + Number(item[field] || 0);
     });
     ['nextBookingRate','repeatRate','ticketPurchaseRate','renewalRate'].forEach(function(field) {
@@ -1630,9 +1630,14 @@ function mergeStaffItems(items) {
     target.ltv = target.newCount + target.existingCount ? target.totalSales / (target.newCount + target.existingCount) : 0;
     target.newLtv = target.newCount ? target.newSales / target.newCount : 0;
     target.renewalLtv = target.renewalCount ? target.renewalSales / target.renewalCount : 0;
-    target.renewalRate = target.existingCount ? target.renewalCount / target.existingCount : target.renewalRate;
+    target.renewalRate = target.renewalEndCount ? target.renewalCount / target.renewalEndCount : target.renewalRate;
   });
   return Object.keys(map).map(function(key) { return map[key]; });
+}
+
+function resolveRenewalRate(rawRate, renewalCount, renewalEndCount) {
+  if (rawRate !== null && rawRate !== '' && Number(rawRate) > 0) return Number(rawRate);
+  return renewalEndCount ? renewalCount / renewalEndCount : 0;
 }
 
 function parseLoginTable(table) {
@@ -1668,8 +1673,12 @@ function parseStaffTable(table) {
     var name = cell(row, 1);
     if (!name || name === 'スタッフ名') return null;
     var offset = Number(cell(row, 2) || 0) < 1 && Number(cell(row, 3) || 0) > 1000 ? 1 : 0;
+    var renewalEndCountIndex = columnIndexByLabel(table, ['回数券終了数', '券終了数'], 10 + offset);
     var renewalCountIndex = columnIndexByLabel(table, ['回数券更新数', '券更新数'], 13 + offset);
     var ticketPurchaseRateIndex = columnIndexByLabel(table, ['回数券購入率', '券購入率'], 14 + offset);
+    var renewalRateIndex = columnIndexByLabel(table, ['回数券更新率', '券更新率'], 15 + offset);
+    var renewalCount = Number(cell(row, renewalCountIndex) || 0);
+    var renewalEndCount = Number(cell(row, renewalEndCountIndex) || 0);
     return {
       name: resolveStaffDisplayName(name),
       totalSales: Number(cell(row, 2 + offset) || 0),
@@ -1678,11 +1687,12 @@ function parseStaffTable(table) {
       renewalSales: Number(cell(row, 5 + offset) || 0),
       existingCount: Number(cell(row, 7 + offset) || 0),
       newCount: Number(cell(row, 8 + offset) || 0),
-      renewalCount: Number(cell(row, renewalCountIndex) || 0),
+      renewalCount: renewalCount,
+      renewalEndCount: renewalEndCount,
       nextBookingRate: Number(cell(row, 11 + offset) || 0),
       repeatRate: Number(cell(row, 12 + offset) || 0),
       ticketPurchaseRate: Number(cell(row, ticketPurchaseRateIndex) || 0),
-      renewalRate: Number(cell(row, 15 + offset) || 0),
+      renewalRate: resolveRenewalRate(cell(row, renewalRateIndex), renewalCount, renewalEndCount),
       reviews: Number(cell(row, 16 + offset) || 0),
       ltv: Number(cell(row, 17 + offset) || 0),
       newLtv: Number(cell(row, 18 + offset) || 0),
@@ -1696,11 +1706,15 @@ function parseStaffTable(table) {
 function parseStoreTable(table) {
   var firstName = cell((table.rows || [])[0], 1);
   if (firstName === 'スタッフ名') return [];
+  var renewalEndCountIndex = columnIndexByLabel(table, ['回数券終了数', '券終了数'], 10);
   var renewalCountIndex = columnIndexByLabel(table, ['回数券更新数', '券更新数'], 13);
   var ticketPurchaseRateIndex = columnIndexByLabel(table, ['回数券購入率', '券購入率'], 14);
+  var renewalRateIndex = columnIndexByLabel(table, ['回数券更新率', '券更新率'], 15);
   return (table.rows || []).map(function(row) {
     var name = cell(row, 1);
     if (!name) return null;
+    var renewalCount = Number(cell(row, renewalCountIndex) || 0);
+    var renewalEndCount = Number(cell(row, renewalEndCountIndex) || 0);
     return {
       name: formatClinicName(name),
       totalSales: Number(cell(row, 2) || 0),
@@ -1709,11 +1723,12 @@ function parseStoreTable(table) {
       renewalSales: Number(cell(row, 6) || 0),
       existingCount: Number(cell(row, 7) || 0),
       newCount: Number(cell(row, 8) || 0),
-      renewalCount: Number(cell(row, renewalCountIndex) || 0),
+      renewalCount: renewalCount,
+      renewalEndCount: renewalEndCount,
       nextBookingRate: Number(cell(row, 11) || 0),
       repeatRate: Number(cell(row, 12) || 0),
       ticketPurchaseRate: Number(cell(row, ticketPurchaseRateIndex) || 0),
-      renewalRate: Number(cell(row, 15) || 0),
+      renewalRate: resolveRenewalRate(cell(row, renewalRateIndex), renewalCount, renewalEndCount),
       reviews: Number(cell(row, 16) || 0),
       ltv: Number(cell(row, 17) || 0),
       newLtv: Number(cell(row, 18) || 0),
@@ -1732,6 +1747,7 @@ function zeroStaffFrom(item) {
     existingCount: 0,
     newCount: 0,
     renewalCount: 0,
+    renewalEndCount: 0,
     nextBookingRate: 0,
     repeatRate: 0,
     ticketPurchaseRate: 0,
@@ -1877,7 +1893,7 @@ function makeAnnualAccumulator(item, isStore) {
 }
 
 function addAnnualItem(target, item) {
-  ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','reviews'].forEach(function(field) {
+  ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','renewalEndCount','reviews'].forEach(function(field) {
     target[field] = Number(target[field] || 0) + Number(item[field] || 0);
   });
   if (Number(item.ticketPurchaseRate || 0) > 0 || hasPerformance(item)) {
@@ -1891,7 +1907,7 @@ function finalizeAnnualItem(item) {
   item.ltv = item.newCount + item.existingCount ? item.totalSales / (item.newCount + item.existingCount) : 0;
   item.newLtv = item.newCount ? item.newSales / item.newCount : 0;
   item.renewalLtv = item.renewalCount ? item.renewalSales / item.renewalCount : 0;
-  item.renewalRate = item.existingCount ? item.renewalCount / item.existingCount : 0;
+  item.renewalRate = item.renewalEndCount ? item.renewalCount / item.renewalEndCount : 0;
   item.ticketPurchaseRate = item._ticketRateMonths ? item._ticketRateSum / item._ticketRateMonths : 0;
   return item;
 }

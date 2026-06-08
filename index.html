@@ -384,14 +384,19 @@ html,body{
       <div class="hist-tabs">
         <div class="hist-tab on" onclick="switchHistChart(this,'sales')">売上</div>
         <div class="hist-tab" onclick="switchHistChart(this,'fan')">更新率</div>
+        <div class="hist-tab" onclick="switchHistChart(this,'fanCount')">更新数</div>
+        <div class="hist-tab" onclick="switchHistChart(this,'fanSales')">更新売上</div>
+        <div class="hist-tab" onclick="switchHistChart(this,'fanPrice')">更新LTV</div>
         <div class="hist-tab" onclick="switchHistChart(this,'ltv')">新規LTV</div>
+        <div class="hist-tab" onclick="switchHistChart(this,'newSales')">新規売上</div>
+        <div class="hist-tab" onclick="switchHistChart(this,'review')">口コミ</div>
       </div>
       <div class="card" style="padding:12px;position:relative;height:150px">
         <canvas id="histChart" style="position:absolute;inset:10px;width:calc(100% - 20px)!important;height:calc(100% - 20px)!important"></canvas>
       </div>
       <div class="card mt8" style="padding:10px">
         <table class="hist-tbl">
-          <thead><tr><th>月</th><th>売上</th><th>更新率</th><th>新規LTV</th></tr></thead>
+          <thead><tr><th>月</th><th id="hist-table-metric">売上</th></tr></thead>
           <tbody id="hist-tbody"></tbody>
         </table>
       </div>
@@ -1902,7 +1907,7 @@ function rankPosition(items, cat, name) {
   if (idx < 0) return null;
   var conf = metricConfig(cat);
   var value = Number(rows[idx][conf.key] || 0);
-  if (value === 0 && rows.every(function(item){ return Number(item[conf.key] || 0) === 0; })) return null;
+  if (value === 0) return null;
   return rows.filter(function(item){ return Number(item[conf.key] || 0) > value; }).length + 1;
 }
 
@@ -1937,14 +1942,24 @@ function renderRankList(listId, items, cat, opts) {
 }
 
 function fmtRank(rank, total, unit) {
-  return rank ? rank + '<span class="stat-unit">位/' + total + unit + '</span>' : '<span class="stat-unit">順位なし</span>';
+  return rank ? rank + '<span class="stat-unit">位/' + total + unit + '</span>' : '<span class="stat-unit">実績なし</span>';
+}
+
+function hasPerformance(item) {
+  return !!item && ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','reviews','newLtv','renewalLtv','renewalRate'].some(function(field) {
+    return Number(item[field] || 0) > 0;
+  });
+}
+
+function metricRankText(rank) {
+  return rank ? rank + '位' : '実績なし';
 }
 
 function renderAnnualZeroData() {
   var year = rankMonth.year || new Date().getFullYear();
   var staff = annualZeroStaff();
   var stores = annualZeroStores();
-  var currentStaff = staff[0] || null;
+  var currentStaff = findLoggedStaff(staff) || staff[0] || null;
   var currentStore = stores[0] || null;
   var totalRank = currentStaff ? rankPosition(staff, 'sales', currentStaff.name) : null;
   var fanRank = currentStaff ? rankPosition(staff, 'a-fan-rate', currentStaff.name) : null;
@@ -2008,6 +2023,8 @@ function renderSheetData(opts) {
     if (cards[4]) cards[4].innerHTML = '<div class="stat-lbl">更新数</div><div class="stat-val" style="color:var(--text)">' + Math.round(currentStaff.renewalCount) + '<span class="stat-unit">件</span></div><div class="stat-sub">既存数<strong>' + Math.round(currentStaff.existingCount) + '件</strong></div>';
     if (cards[5]) cards[5].innerHTML = '<div class="stat-lbl">更新売上</div><div class="stat-val" style="color:var(--text)">' + fmtYenMan(currentStaff.renewalSales) + '</div><div class="stat-sub">更新LTV<strong>' + fmtYen(currentStaff.renewalLtv) + '</strong></div>';
     updateHistoryData(currentStaff);
+    renderFanProfile(currentStaff);
+    renderTrophyStatus(currentStaff);
     }
     renderRankList('rl-m-sales', appData.staff, 'sales', { currentName: currentStaff.name, unit: '名', sub: function(i){ return 'LTV ' + fmtYen(i.ltv); } });
     renderRankList('rl-m-existing', appData.staff, rankMetricState['rl-m-existing'], { currentName: currentStaff.name, unit: '名', sub: function(i){ return '更新売上 ' + fmtYenMan(i.renewalSales); } });
@@ -2021,6 +2038,30 @@ function renderSheetData(opts) {
     renderRankList('rl-store-m-review', appData.stores, 'review', { currentName: currentStore.name, unit: '店舗', meLabel: '所属', sub: function(i){ return 'LTV ' + fmtYen(i.ltv); } });
   }
   if (updateProfile) renderAnnualZeroData();
+}
+
+function renderFanProfile(currentStaff) {
+  var score = document.querySelector('#pt-fan .fan-score');
+  if (score) score.textContent = fmtPct(currentStaff && currentStaff.renewalRate);
+  var cards = document.querySelectorAll('#pt-fan .stat-card');
+  var fanRank = rankPosition(appData.staff, 'fan-rate', currentStaff && currentStaff.name);
+  var countRank = rankPosition(appData.staff, 'fan-count', currentStaff && currentStaff.name);
+  var salesRank = rankPosition(appData.staff, 'fan-sales', currentStaff && currentStaff.name);
+  var priceRank = rankPosition(appData.staff, 'fan-price', currentStaff && currentStaff.name);
+  if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">更新率</div><div class="stat-val" style="color:var(--silver)">' + fmtPct(currentStaff && currentStaff.renewalRate) + '</div><div class="stat-sub">ランク<strong>' + metricRankText(fanRank) + '</strong></div>';
+  if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">更新数</div><div class="stat-val">' + Math.round(currentStaff && currentStaff.renewalCount || 0) + '<span class="stat-unit">件</span></div><div class="stat-sub">ランク<strong>' + metricRankText(countRank) + '</strong></div>';
+  if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">更新売上</div><div class="stat-val">' + fmtYen(currentStaff && currentStaff.renewalSales) + '</div><div class="stat-sub">ランク<strong>' + metricRankText(salesRank) + '</strong></div>';
+  if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">更新LTV</div><div class="stat-val" style="color:var(--gold)">' + fmtYen(currentStaff && currentStaff.renewalLtv) + '</div><div class="stat-sub">ランク<strong>' + metricRankText(priceRank) + '</strong></div>';
+}
+
+function renderTrophyStatus(currentStaff) {
+  var container = document.querySelector('#pt-trophy .sec');
+  if (!container) return;
+  if (!hasPerformance(currentStaff)) {
+    container.innerHTML = '<div class="sec-hd">実績ステータス</div><div class="card"><div class="stat-lbl">実績なし</div><div class="stat-sub">ランキング実績は月末確定後、対象データがある場合に反映されます。</div></div>';
+    return;
+  }
+  container.innerHTML = '<div class="sec-hd">実績ステータス</div><div class="card"><div class="stat-lbl">実績集計中</div><div class="stat-sub">ランキング獲得回数は月末確定後に更新されます。</div></div>';
 }
 
 function loadMonthlySheetData(opts) {
@@ -2151,12 +2192,20 @@ function filterRank(input, listId) {
 // ── history chart ─────────────────────────────────────────────
 var histD = {
   labels:  ['7月','8月','9月','10月','11月','12月','1月','2月','3月','4月','5月','6月'],
-  sales:   [0,0,0,0,0,0,0,0,0,0,0,0],
-  fan:     [0,0,0,0,0,0,0,0,0,0,0,0],
-  ltv:     [0,0,0,0,0,0,0,0,0,0,0,0]
+  sales:   [0,0,0,0,0,0,0,0,0,0,0,0]
 };
 var chartObj = null;
 window._chartMetric = 'sales';
+var histMetricConfig = {
+  sales: { label: '売上', color: '#4f3ef5', fmt: fmtYen, value: function(s){ return Number(s && s.totalSales || 0); } },
+  fan: { label: '更新率', color: '#00a878', fmt: fmtPct, value: function(s){ return Number(s && s.renewalRate || 0); } },
+  fanCount: { label: '更新数', color: '#1a7fd4', fmt: function(v){ return Math.round(v) + '件'; }, value: function(s){ return Number(s && s.renewalCount || 0); } },
+  fanSales: { label: '更新売上', color: '#e040a0', fmt: fmtYen, value: function(s){ return Number(s && s.renewalSales || 0); } },
+  fanPrice: { label: '更新LTV', color: '#c9920a', fmt: fmtYen, value: function(s){ return Number(s && s.renewalLtv || 0); } },
+  ltv: { label: '新規LTV', color: '#8a5cf6', fmt: fmtYen, value: function(s){ return Number(s && s.newLtv || 0); } },
+  newSales: { label: '新規売上', color: '#00a0b8', fmt: fmtYen, value: function(s){ return Number(s && s.newSales || 0); } },
+  review: { label: '口コミ', color: '#704020', fmt: function(v){ return Math.round(v) + '件'; }, value: function(s){ return Number(s && s.reviews || 0); } }
+};
 
 function updateHistoryData(currentStaff) {
   var labels = [];
@@ -2165,9 +2214,9 @@ function updateHistoryData(currentStaff) {
     labels.push((d.getMonth() + 1) + '月');
   }
   histD.labels = labels;
-  histD.sales = Array(11).fill(0).concat([Number(currentStaff && currentStaff.totalSales || 0) / 10000]);
-  histD.fan = Array(11).fill(0).concat([Math.round(Number(currentStaff && currentStaff.renewalRate || 0) * 1000) / 10]);
-  histD.ltv = Array(11).fill(0).concat([Number(currentStaff && currentStaff.newLtv || 0)]);
+  Object.keys(histMetricConfig).forEach(function(key) {
+    histD[key] = Array(11).fill(0).concat([histMetricConfig[key].value(currentStaff)]);
+  });
   if (window._chartDone) renderChart(window._chartMetric);
   renderTable();
 }
@@ -2187,24 +2236,20 @@ function renderChart(metric) {
   var canvas = document.getElementById('histChart');
   if (!canvas) return;
   if (chartObj) { chartObj.destroy(); chartObj = null; }
-  var map = {
-    sales: { data: histD.sales, color: '#4f3ef5', fmt: function(v){ return fmtYen(v * 10000); } },
-    fan:   { data: histD.fan,   color: '#00a878', fmt: function(v){ return v+'%'; } },
-    ltv:   { data: histD.ltv,   color: '#c9920a', fmt: function(v){ return '¥'+v.toLocaleString(); } }
-  };
-  var m = map[metric];
+  var m = histMetricConfig[metric] || histMetricConfig.sales;
+  var data = histD[metric] || histD.sales || [];
   chartObj = new Chart(canvas.getContext('2d'), {
     type: 'line',
     data: {
       labels: histD.labels,
-      datasets: [{ data: m.data, borderColor: m.color, backgroundColor: m.color+'18', borderWidth: 2, pointBackgroundColor: m.color, pointRadius: 3, pointHoverRadius: 5, fill: true, tension: 0.35 }]
+      datasets: [{ data: data, borderColor: m.color, backgroundColor: m.color+'18', borderWidth: 2, pointBackgroundColor: m.color, pointRadius: 3, pointHoverRadius: 5, fill: true, tension: 0.35 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return m.fmt(c.parsed.y); } } } },
       scales: {
         x: { grid: { display: false }, ticks: { font: { size: 9, family:"'DM Mono'" }, color: '#7a7a96' } },
-        y: { grid: { color: 'rgba(15,15,40,.06)' }, border: { display: false }, ticks: { font: { size: 9, family:"'DM Mono'" }, color: '#7a7a96', callback: function(v){ return metric==='sales'?fmtYen(v * 10000):metric==='fan'?v+'%':'¥'+(v/1000).toFixed(0)+'k'; } } }
+        y: { grid: { color: 'rgba(15,15,40,.06)' }, border: { display: false }, ticks: { font: { size: 9, family:"'DM Mono'" }, color: '#7a7a96', callback: function(v){ return m.fmt(v); } } }
       }
     }
   });
@@ -2214,21 +2259,24 @@ function switchHistChart(el, metric) {
   el.parentNode.querySelectorAll('.hist-tab').forEach(function(t){t.classList.remove('on')});
   el.classList.add('on');
   renderChart(metric);
+  renderTable();
 }
 
 function renderTable() {
   var tbody = document.getElementById('hist-tbody');
   if (!tbody) return;
+  var metric = window._chartMetric || 'sales';
+  var conf = histMetricConfig[metric] || histMetricConfig.sales;
+  var label = document.getElementById('hist-table-metric');
+  if (label) label.textContent = conf.label;
+  var data = histD[metric] || histD.sales || [];
   var html = '';
   histD.labels.forEach(function(m, i) {
     var latest = i === histD.labels.length - 1;
     var fw = latest ? 'font-weight:700' : '';
-    var rc = histD.fan[i] >= 75 ? 'color:var(--teal)' : 'color:var(--coral)';
     html += '<tr>';
     html += '<td style="'+fw+(latest?';color:var(--text)':';color:var(--text3)')+'">'+m+'</td>';
-    html += '<td style="'+fw+'">'+fmtYen(histD.sales[i] * 10000)+'</td>';
-    html += '<td style="'+rc+'">'+histD.fan[i]+'%</td>';
-    html += '<td style="'+fw+'">¥'+histD.ltv[i].toLocaleString()+'</td>';
+    html += '<td style="'+fw+'">'+conf.fmt(data[i] || 0)+'</td>';
     html += '</tr>';
   });
   tbody.innerHTML = html;

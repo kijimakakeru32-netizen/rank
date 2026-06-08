@@ -195,10 +195,10 @@ html,body{
 .month-current{min-width:0;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:0 14px;font-size:clamp(15px,5vw,20px);font-weight:800;letter-spacing:-.04em;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rank-progress{margin-bottom:14px}
 .rank-block{margin:0 16px 18px}
-.rank-block-hd{display:flex;align-items:center;gap:7px;margin-bottom:8px}
-.rank-block-icon{font-size:15px}
-.rank-block-title{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:var(--text);flex:1}
-.rank-block-sub{font-size:10px;color:var(--text3);background:#e8e8ee;padding:2px 7px;border-radius:7px;font-family:'DM Sans',sans-serif;font-weight:600}
+.rank-block-hd{display:flex;align-items:center;gap:9px;margin-bottom:10px;padding:10px 11px;border:1px solid rgba(15,15,40,.08);border-radius:14px;background:linear-gradient(135deg,#fff,rgba(245,246,255,.92));box-shadow:0 8px 18px rgba(15,15,40,.04)}
+.rank-block-icon{font-size:17px}
+.rank-block-title{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:900;color:var(--text);letter-spacing:-.035em;line-height:1.25;flex:1}
+.rank-block-sub{font-size:10px;color:#3728d0;background:rgba(79,62,245,.09);border:1px solid rgba(79,62,245,.12);padding:4px 8px;border-radius:999px;font-family:'DM Sans',sans-serif;font-weight:800;white-space:nowrap}
 .sub-tabs{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
 .sub-tab{font-size:11px;font-family:'DM Sans',sans-serif;font-weight:600;padding:4px 9px;border-radius:7px;border:1px solid var(--border2);color:var(--text3);cursor:pointer;transition:all .18s}
 .sub-tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -942,11 +942,10 @@ html,body{
           <div class="learning-icon">🗂️</div>
           <div><div class="learning-title">2025年 代表研修アーカイブ</div><div class="learning-meta">Notion database</div></div>
         </div>
-        <div class="learning-desc">2025年の研修タイトル・公開日・YouTubeリンクをNotionで確認できます。個別カード化できるよう、次の更新で一覧データ連携に対応予定です。</div>
+        <div class="learning-desc">2025年の研修タイトル・公開日・YouTubeリンクをNotionで確認できます。</div>
         <div class="learning-actions"><span class="learning-pill">Notionを開く</span><span class="learning-pill green">YouTubeリンクあり</span></div>
       </a>
     </div>
-    <div class="learning-note">Notionページの個別データを公開取得できる状態になったら、タイトル・公開日・YouTubeリンクをこの画面内にカードとして展開できます。</div>
   </section>
 
   <section class="learning-section">
@@ -959,7 +958,7 @@ html,body{
         <div class="mentor-thumb">▶</div>
         <div class="learning-title">整体KOTOBUKI メンターチャンネル</div>
         <div class="learning-meta">YouTube / 最新動画一覧</div>
-        <div class="learning-desc">メンター動画の最新一覧をYouTubeで開きます。チャンネル側に動画が追加されると、YouTube上の一覧も自動で更新されます。</div>
+        <div class="learning-desc">メンター動画の最新一覧をYouTubeで開きます。</div>
         <div class="learning-actions"><span class="learning-pill">YouTubeを開く</span><span class="learning-pill green">メンター</span></div>
       </a>
     </div>
@@ -1017,6 +1016,7 @@ function switchPage(id, btn) {
   document.getElementById(id).classList.add('on');
   btn.classList.add('on');
   if (id === 'pg-profile' && !window._chartDone) initChart();
+  if (id === 'pg-ranking') refreshRankingDataNow();
 }
 
 function openProfilePage() {
@@ -1041,6 +1041,19 @@ function openLearningLink(link) {
   var url = /^https?:\/\//.test(href) ? href : new URL(href, window.location.href).href;
   window.location.assign(url);
   return false;
+}
+
+function refreshRankingDataNow() {
+  if (!appData.loginUser) return;
+  setSheetStatus('ランキング実績を最新データに更新中...');
+  loadStaffMasterData().then(function(users) {
+    appData.loginUsers = users;
+    syncLoggedUserFromMaster();
+  }).catch(function(err) {
+    console.warn(err);
+  }).then(function() {
+    loadMonthlySheetData({ rankingOnly: !shouldAutoUpdateProfile() });
+  });
 }
 
 var currentPdfUrl = '';

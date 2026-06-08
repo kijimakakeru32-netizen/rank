@@ -113,6 +113,13 @@ html,body{
 .stat-unit{font-size:10px;color:var(--text3);margin-left:2px}
 .stat-sub{font-size:10px;color:var(--text3);margin-top:3px}
 .stat-sub strong{color:var(--text);font-weight:600}
+.annual-card{overflow:hidden}
+.annual-card .stat-val{font-size:22px}
+.annual-kpis{display:grid;gap:5px;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
+.annual-kpi{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--text3)}
+.annual-kpi strong{font-family:'DM Mono',monospace;color:var(--text);font-weight:500;text-align:right}
+.top10-gap{display:inline-flex;align-items:center;margin-top:9px;padding:5px 8px;border-radius:999px;background:rgba(232,24,74,.08);color:#c0102a;font-size:10px;font-weight:700}
+.top10-gap.in{background:rgba(0,168,120,.1);color:#006e50}
 .stat-badge{position:absolute;top:9px;right:9px;font-size:9px;font-family:'DM Sans',sans-serif;font-weight:700;padding:2px 5px;border-radius:5px}
 .up{background:rgba(0,168,120,.1);color:#006e50}
 .dn{background:rgba(232,24,74,.1);color:#c0102a}
@@ -160,14 +167,6 @@ html,body{
 .trophy-medal{font-size:20px;line-height:1}
 .trophy-cat{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:var(--text);text-align:center;line-height:1.3}
 .trophy-detail{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-align:center}
-
-/* ── FAN RING ── */
-.fan-ring-wrap{display:flex;justify-content:center;padding:6px 0 12px}
-.fan-ring{position:relative;width:110px;height:110px}
-.fan-ring svg{transform:rotate(-90deg)}
-.fan-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.fan-score{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;color:var(--text)}
-.fan-sub{font-size:10px;color:var(--text3)}
 
 /* ── HISTORY TABLE ── */
 .hist-tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
@@ -347,7 +346,6 @@ html,body{
   <div class="tab-bar">
     <div class="tab on" onclick="switchTab(this,'pt-monthly')">月次</div>
     <div class="tab" onclick="switchTab(this,'pt-annual')">年次</div>
-    <div class="tab" onclick="switchTab(this,'pt-fan')">ファン</div>
     <div class="tab" onclick="switchTab(this,'pt-trophy')">実績</div>
   </div>
 
@@ -410,43 +408,18 @@ html,body{
   <div id="pt-annual" style="display:none">
     <div class="sp"></div>
     <div class="sum-card">
-      <div class="sum-lbl">2024年 年間売上</div>
-      <div class="sum-val">¥10,840,000</div>
-      <div class="sum-sub">年間目標 ¥12,000,000 に対し <strong style="color:var(--gold)">90%</strong> 達成</div>
-      <div class="sum-change">▲ 前年比 +¥1,240,000（+12.9%）</div>
+      <div class="sum-lbl">2026年6月起点 年間売上</div>
+      <div class="sum-val">¥0</div>
+      <div class="sum-sub">2026年6月から当月までの実績をリアルタイム集計</div>
+      <div class="sum-change">年間データを同期中</div>
     </div>
     <div class="sec mt16">
       <div class="sec-hd">年間指標</div>
       <div class="stat-grid">
-        <div class="stat-card"><div class="stat-lbl">年間総合売上ランク</div><div class="stat-val" style="color:var(--silver)">2<span class="stat-unit">位/17名</span></div></div>
-        <div class="stat-card"><div class="stat-lbl">年間ファン化ランク</div><div class="stat-val" style="color:var(--bronze)">3<span class="stat-unit">位/17名</span></div></div>
-        <div class="stat-card"><div class="stat-lbl">年間信頼獲得ランク</div><div class="stat-val" style="color:var(--text)">4<span class="stat-unit">位/17名</span></div></div>
-        <div class="stat-card"><div class="stat-lbl">年間口コミランク</div><div class="stat-val" style="color:var(--silver)">2<span class="stat-unit">位/17名</span></div></div>
-      </div>
-    </div>
-    <div class="sp"></div>
-  </div>
-
-  <!-- FAN TAB -->
-  <div id="pt-fan" style="display:none">
-    <div class="sp"></div>
-    <div class="fan-ring-wrap">
-      <div class="fan-ring">
-        <svg width="110" height="110" viewBox="0 0 110 110">
-          <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(79,62,245,.1)" stroke-width="9"/>
-          <circle cx="55" cy="55" r="46" fill="none" stroke="url(#fg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="63"/>
-          <defs><linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e040a0"/><stop offset="100%" stop-color="#4f3ef5"/></linearGradient></defs>
-        </svg>
-        <div class="fan-ring-center"><div class="fan-score">78%</div><div class="fan-sub">更新率</div></div>
-      </div>
-    </div>
-    <div class="sec">
-      <div class="sec-hd">ファン指標詳細</div>
-      <div class="stat-grid">
-        <div class="stat-card"><div class="stat-lbl">更新率</div><div class="stat-val" style="color:var(--silver)">78.4<span class="stat-unit">%</span></div><div class="stat-sub">ランク<strong style="color:var(--silver)">2位</strong></div></div>
-        <div class="stat-card"><div class="stat-lbl">更新数</div><div class="stat-val">42<span class="stat-unit">件</span></div><div class="stat-sub">ランク<strong style="color:var(--bronze)">3位</strong></div></div>
-        <div class="stat-card"><div class="stat-lbl">更新売上</div><div class="stat-val">¥840,000</div><div class="stat-sub">ランク<strong style="color:var(--silver)">2位</strong></div></div>
-        <div class="stat-card"><div class="stat-lbl">更新LTV</div><div class="stat-val" style="color:var(--gold)">¥20,000</div><div class="stat-sub">ランク<strong style="color:var(--gold)">1位</strong></div></div>
+        <div class="stat-card annual-card"><div class="stat-lbl">年間総合売上ランク</div><div class="stat-val"><span class="stat-unit">同期中</span></div></div>
+        <div class="stat-card annual-card"><div class="stat-lbl">年間ファン化ランク</div><div class="stat-val"><span class="stat-unit">同期中</span></div></div>
+        <div class="stat-card annual-card"><div class="stat-lbl">年間信頼獲得ランク</div><div class="stat-val"><span class="stat-unit">同期中</span></div></div>
+        <div class="stat-card annual-card"><div class="stat-lbl">年間口コミランク</div><div class="stat-val"><span class="stat-unit">同期中</span></div></div>
       </div>
     </div>
     <div class="sp"></div>
@@ -1108,7 +1081,7 @@ function switchTab(el, id) {
   var bar = el.parentNode;
   bar.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on')});
   el.classList.add('on');
-  ['pt-monthly','pt-annual','pt-fan','pt-trophy'].forEach(function(tid){
+  ['pt-monthly','pt-annual','pt-trophy'].forEach(function(tid){
     var el2 = document.getElementById(tid);
     if (el2) el2.style.display = 'none';
   });
@@ -1204,11 +1177,13 @@ function updateBusinessProgress() {
 // ── Google Sheets sync ───────────────────────────────────────
 var SHEET_ID = '1L57cYe7HP_E97JBPLDcIjOr4dIyiXiL9xu4lF2hhZiU';
 var LOGIN_GID = '461414002';
-var appData = { staff: [], stores: [], currentStaff: null, currentStore: null, loadedKey: '', lastStaff: [], lastStores: [], loginUsers: [], loginUser: null };
+var appData = { staff: [], stores: [], annualStaff: [], annualStores: [], annualMonths: [], currentStaff: null, currentStore: null, loadedKey: '', lastStaff: [], lastStores: [], loginUsers: [], loginUser: null };
 var monthlyLoadSeq = 0;
+var annualLoadSeq = 0;
 var SHEET_REFRESH_INTERVAL_MS = 30000;
 var sheetAutoRefreshTimer = null;
 var STAFF_SHEET_LAST_ROW = 72;
+var ANNUAL_START = { year: 2026, month: 6 };
 var LOGIN_STORAGE_KEY = 'kotobukiPortalLoginUser';
 var DEFAULT_STAFF_NAMES = ['田中 美咲', '山本 健太', '佐藤 裕子', '鈴木 拓也', '高橋 あかり'];
 var DEFAULT_STORE_NAMES = ['吉祥寺院', '幕張院', '西日暮里院', '新宿院', '池袋院'];
@@ -1397,6 +1372,7 @@ function unlockApp(user) {
   buildZeroMonthlyData();
   renderSheetData();
   loadMonthlySheetData();
+  loadAnnualSheetData();
   startSheetAutoRefresh();
   setTimeout(initChart, 250);
 }
@@ -1596,12 +1572,16 @@ function rowValues(row) {
   });
 }
 
-function tableMatchesSelectedMonth(table) {
+function tableMatchesMonth(table, monthInfo) {
   var first = cell((table.rows || [])[0], 0);
   if (!first) return true;
   var m = String(first).match(/^Date\((\d+),(\d+),/);
   if (!m) return true;
-  return Number(m[1]) === rankMonth.year && Number(m[2]) + 1 === rankMonth.month;
+  return Number(m[1]) === monthInfo.year && Number(m[2]) + 1 === monthInfo.month;
+}
+
+function tableMatchesSelectedMonth(table) {
+  return tableMatchesMonth(table, rankMonth);
 }
 
 function normalizeName(name) {
@@ -1844,6 +1824,7 @@ function refreshAppDataSilently() {
   }).then(function() {
     if (!appData.loginUser) return;
     loadMonthlySheetData({ rankingOnly: !shouldAutoUpdateProfile(), silent: true });
+    loadAnnualSheetData({ silent: true });
   });
 }
 
@@ -1866,6 +1847,74 @@ function annualZeroStaff() {
 function annualZeroStores() {
   var base = appData.lastStores.length ? appData.lastStores : (appData.stores.length ? appData.stores : DEFAULT_STORE_NAMES.map(function(name){ return { name: name }; }));
   return base.map(function(item){ return Object.assign(zeroStoreFrom(item), item, { name: formatClinicName(item.name) }); });
+}
+
+function monthKey(monthInfo) {
+  return monthInfo.year + '/' + monthInfo.month;
+}
+
+function annualPeriodMonths() {
+  var months = [];
+  var cursor = new Date(ANNUAL_START.year, ANNUAL_START.month - 1, 1);
+  var profileEnd = new Date(profileMonth.year, profileMonth.month - 1, 1);
+  for (var i = 0; i < 12; i++) {
+    var y = cursor.getFullYear();
+    var m = cursor.getMonth() + 1;
+    if (cursor > profileEnd) break;
+    months.push({ year: y, month: m });
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+  return months.length ? months : [{ year: ANNUAL_START.year, month: ANNUAL_START.month }];
+}
+
+function makeAnnualAccumulator(item, isStore) {
+  var base = isStore ? zeroStoreFrom(item) : zeroStaffFrom(item);
+  base.name = isStore ? formatClinicName(item && item.name) : (item && item.name ? item.name : base.name);
+  base._ticketRateSum = 0;
+  base._ticketRateMonths = 0;
+  base._activeMonths = 0;
+  return base;
+}
+
+function addAnnualItem(target, item) {
+  ['totalSales','newSales','existingSales','renewalSales','existingCount','newCount','renewalCount','reviews'].forEach(function(field) {
+    target[field] = Number(target[field] || 0) + Number(item[field] || 0);
+  });
+  if (Number(item.ticketPurchaseRate || 0) > 0 || hasPerformance(item)) {
+    target._ticketRateSum += Number(item.ticketPurchaseRate || 0);
+    target._ticketRateMonths += 1;
+  }
+  if (hasPerformance(item)) target._activeMonths += 1;
+}
+
+function finalizeAnnualItem(item) {
+  item.ltv = item.newCount + item.existingCount ? item.totalSales / (item.newCount + item.existingCount) : 0;
+  item.newLtv = item.newCount ? item.newSales / item.newCount : 0;
+  item.renewalLtv = item.renewalCount ? item.renewalSales / item.renewalCount : 0;
+  item.renewalRate = item.existingCount ? item.renewalCount / item.existingCount : 0;
+  item.ticketPurchaseRate = item._ticketRateMonths ? item._ticketRateSum / item._ticketRateMonths : 0;
+  return item;
+}
+
+function aggregateAnnualItems(monthlyLists, baseItems, isStore) {
+  var map = {};
+  (baseItems || []).forEach(function(item) {
+    var displayName = isStore ? formatClinicName(item.name) : item.name;
+    var key = normalizeName(displayName);
+    if (!key) return;
+    map[key] = makeAnnualAccumulator({ name: displayName }, isStore);
+  });
+  (monthlyLists || []).forEach(function(list) {
+    (list || []).forEach(function(item) {
+      var displayName = isStore ? formatClinicName(item.name) : item.name;
+      var key = normalizeName(displayName);
+      if (!key) return;
+      if (!map[key]) map[key] = makeAnnualAccumulator({ name: displayName }, isStore);
+      addAnnualItem(map[key], item);
+    });
+  });
+  var items = Object.keys(map).map(function(key) { return finalizeAnnualItem(map[key]); });
+  return isStore ? items : includeLoggedStaff(items);
 }
 
 function formatClinicName(name) {
@@ -2001,10 +2050,48 @@ function metricRankText(rank) {
   return rank ? rank + '位' : '実績なし';
 }
 
+function top10GapInfo(items, cat, name) {
+  var conf = metricConfig(cat);
+  var rows = rankRows(items || [], cat);
+  var current = rows.find(function(item) { return item.name === name; });
+  if (!current || !rows.length) return { html: '実績なし', inTop10: false };
+  if (rows.every(function(item) { return Number(item[conf.key] || 0) === 0; })) return { html: '実績なし', inTop10: false };
+  var value = Number(current[conf.key] || 0);
+  var top10Index = Math.min(9, rows.length - 1);
+  var top10Threshold = Number(rows[top10Index] && rows[top10Index][conf.key] || 0);
+  if (value === 0) {
+    if (top10Threshold <= 0) return { html: '実績なし', inTop10: false };
+    return { html: 'Top10まであと ' + formatGapValue(top10Threshold, cat), inTop10: false };
+  }
+  var rank = rankPosition(items, cat, name);
+  if (rank && rank <= 10) return { html: 'TOP10入り', inTop10: true };
+  var threshold = top10Threshold;
+  var gap = Math.max(0, threshold - value);
+  return { html: 'Top10まであと ' + formatGapValue(gap, cat), inTop10: false };
+}
+
+function formatGapValue(value, cat) {
+  if (/rate/.test(cat)) return (Math.round(Number(value || 0) * 1000) / 10) + 'pt';
+  if (/count|review/.test(cat)) return Math.ceil(Number(value || 0)) + '件';
+  return fmtYen(Math.ceil(Number(value || 0)));
+}
+
+function top10GapBadge(items, cat, name) {
+  var info = top10GapInfo(items, cat, name);
+  return '<div class="top10-gap' + (info.inTop10 ? ' in' : '') + '">' + info.html + '</div>';
+}
+
+function annualKpiRows(rows) {
+  return '<div class="annual-kpis">' + rows.map(function(row) {
+    return '<div class="annual-kpi"><span>' + row[0] + '</span><strong>' + row[1] + '</strong></div>';
+  }).join('') + '</div>';
+}
+
 function renderAnnualZeroData() {
-  var year = rankMonth.year || new Date().getFullYear();
-  var staff = annualZeroStaff();
-  var stores = annualZeroStores();
+  var months = appData.annualMonths && appData.annualMonths.length ? appData.annualMonths : annualPeriodMonths();
+  var periodLabel = monthKey(months[0]) + ' - ' + monthKey(months[months.length - 1]);
+  var staff = appData.annualStaff.length ? appData.annualStaff : annualZeroStaff();
+  var stores = appData.annualStores.length ? appData.annualStores : annualZeroStores();
   var currentStaff = findLoggedStaff(staff) || staff[0] || null;
   var currentStore = stores[0] || null;
   var totalRank = currentStaff ? rankPosition(staff, 'sales', currentStaff.name) : null;
@@ -2016,16 +2103,24 @@ function renderAnnualZeroData() {
   var annualValue = document.querySelector('#pt-annual .sum-val');
   var annualSub = document.querySelector('#pt-annual .sum-sub');
   var annualChange = document.querySelector('#pt-annual .sum-change');
-  if (annualLabel) annualLabel.textContent = year + '年 年間売上';
+  if (annualLabel) annualLabel.textContent = '2026年6月起点 年間売上';
   if (annualValue) annualValue.textContent = fmtYen(currentStaff ? currentStaff.totalSales : 0);
-  if (annualSub) annualSub.innerHTML = '現時点の月次実績を年次累計として反映';
-  if (annualChange) annualChange.textContent = '前年比 ¥0（0%）';
+  if (annualSub) annualSub.innerHTML = periodLabel + ' の取得済み月を累計・平均化';
+  if (annualChange) annualChange.textContent = '当月シート更新時に自動反映';
 
   var cards = document.querySelectorAll('#pt-annual .stat-card');
-  if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">年間総合売上ランク</div><div class="stat-val">' + fmtRank(totalRank, staff.length, '名') + '</div><div class="stat-sub">売上<strong>' + fmtYen(currentStaff && currentStaff.totalSales) + '</strong></div>';
-  if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">年間ファン化ランク</div><div class="stat-val">' + fmtRank(fanRank, staff.length, '名') + '</div><div class="stat-sub">更新率<strong>' + fmtPct(currentStaff && currentStaff.renewalRate) + '</strong></div>';
-  if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">年間信頼獲得ランク</div><div class="stat-val">' + fmtRank(trustRank, staff.length, '名') + '</div><div class="stat-sub">新規LTV<strong>' + fmtYen(currentStaff && currentStaff.newLtv) + '</strong></div>';
-  if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">年間口コミランク</div><div class="stat-val">' + fmtRank(reviewRank, staff.length, '名') + '</div><div class="stat-sub">口コミ<strong>' + Math.round(currentStaff && currentStaff.reviews || 0) + '件</strong></div>';
+  if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">年間総合売上ランク</div><div class="stat-val">' + fmtRank(totalRank, staff.length, '名') + '</div>' +
+    annualKpiRows([['総売上', fmtYen(currentStaff && currentStaff.totalSales)]]) +
+    top10GapBadge(staff, 'sales', currentStaff && currentStaff.name);
+  if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">年間ファン化ランク</div><div class="stat-val">' + fmtRank(fanRank, staff.length, '名') + '</div>' +
+    annualKpiRows([['平均更新率', fmtPct(currentStaff && currentStaff.renewalRate)], ['更新数', Math.round(currentStaff && currentStaff.renewalCount || 0) + '件'], ['更新売上', fmtYen(currentStaff && currentStaff.renewalSales)], ['更新LTV', fmtYen(currentStaff && currentStaff.renewalLtv)]]) +
+    top10GapBadge(staff, 'a-fan-rate', currentStaff && currentStaff.name);
+  if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">年間信頼獲得ランク</div><div class="stat-val">' + fmtRank(trustRank, staff.length, '名') + '</div>' +
+    annualKpiRows([['新規LTV', fmtYen(currentStaff && currentStaff.newLtv)], ['新規売上', fmtYen(currentStaff && currentStaff.newSales)], ['回数券購入率', fmtPct(currentStaff && currentStaff.ticketPurchaseRate)]]) +
+    top10GapBadge(staff, 'a-new-price', currentStaff && currentStaff.name);
+  if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">年間口コミランク</div><div class="stat-val">' + fmtRank(reviewRank, staff.length, '名') + '</div>' +
+    annualKpiRows([['口コミ総数', Math.round(currentStaff && currentStaff.reviews || 0) + '件']]) +
+    top10GapBadge(staff, 'review', currentStaff && currentStaff.name);
 
   renderRankList('rl-a-sales', staff, 'sales', { currentName: currentStaff && currentStaff.name, unit: '名' });
   renderRankList('rl-a-existing', staff, rankMetricState['rl-a-existing'], { currentName: currentStaff && currentStaff.name, unit: '名' });
@@ -2047,33 +2142,32 @@ function renderSheetData(opts) {
   appData.currentStaff = currentStaff;
   var subtitle = document.getElementById('ranking-subtitle');
   if (subtitle) subtitle.textContent = 'スタッフ ' + appData.staff.length + '名 · 店舗 ' + appData.stores.length + '店舗';
-  if (currentStaff) {
-    if (updateProfile) {
-    document.querySelector('.hero-name').textContent = currentStaff.name;
-    document.querySelector('.avatar').textContent = currentStaff.name.charAt(0);
-    document.querySelector('#pt-monthly .sum-val').textContent = fmtYen(currentStaff.totalSales);
-    var monthChange = document.getElementById('profile-month-change');
-    if (monthChange) {
-      monthChange.textContent = '';
-      monthChange.style.display = 'none';
-    }
-    var cards = document.querySelectorAll('#pt-monthly .stat-card');
-    var totalRank = monthlyRankPosition(appData.staff, 'sales', currentStaff.name);
-    var fanRank = monthlyRankPosition(appData.staff, 'fan-rate', currentStaff.name);
-    var trustRank = monthlyRankPosition(appData.staff, 'new-price', currentStaff.name);
-    var ticketRank = monthlyRankPosition(appData.staff, 'new-ticket-rate', currentStaff.name);
-    var reviewRank = monthlyRankPosition(appData.staff, 'review', currentStaff.name);
-    if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">総合売上ランク</div><div class="stat-val" style="color:var(--bronze)">' + fmtRank(totalRank, appData.staff.length, '名') + '</div><div class="stat-sub">売上<strong>' + fmtYenMan(currentStaff.totalSales) + '</strong></div>';
-    if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">ファン化ランク</div><div class="stat-val" style="color:var(--silver)">' + fmtRank(fanRank, appData.staff.length, '名') + '</div><div class="stat-sub">更新率<strong>' + fmtPct(currentStaff.renewalRate) + '</strong></div>';
-    if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">信頼獲得ランク</div><div class="stat-val" style="color:var(--text)">' + fmtRank(trustRank, appData.staff.length, '名') + '</div><div class="stat-sub">新規LTV<strong>' + fmtYen(currentStaff.newLtv) + '</strong></div>';
-    if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">口コミランク</div><div class="stat-val" style="color:var(--bronze)">' + fmtRank(reviewRank, appData.staff.length, '名') + '</div><div class="stat-sub">口コミ<strong>' + Math.round(currentStaff.reviews) + '件</strong></div>';
-    if (cards[4]) cards[4].innerHTML = '<div class="stat-lbl">更新数</div><div class="stat-val" style="color:var(--text)">' + Math.round(currentStaff.renewalCount) + '<span class="stat-unit">件</span></div><div class="stat-sub">既存数<strong>' + Math.round(currentStaff.existingCount) + '件</strong></div>';
-    if (cards[5]) cards[5].innerHTML = '<div class="stat-lbl">更新売上</div><div class="stat-val" style="color:var(--text)">' + fmtYenMan(currentStaff.renewalSales) + '</div><div class="stat-sub">更新LTV<strong>' + fmtYen(currentStaff.renewalLtv) + '</strong></div>';
-    if (cards[6]) cards[6].innerHTML = '<div class="stat-lbl">回数券購入率</div><div class="stat-val" style="color:var(--text)">' + fmtPct(currentStaff.ticketPurchaseRate) + '</div><div class="stat-sub">ランク<strong>' + fmtRank(ticketRank, appData.staff.length, '名') + '</strong></div>';
-    updateHistoryData(currentStaff);
-    renderFanProfile(currentStaff);
-    renderTrophyStatus(currentStaff);
-    }
+	  if (currentStaff) {
+	    if (updateProfile) {
+	      document.querySelector('.hero-name').textContent = currentStaff.name;
+	      document.querySelector('.avatar').textContent = currentStaff.name.charAt(0);
+	      document.querySelector('#pt-monthly .sum-val').textContent = fmtYen(currentStaff.totalSales);
+	      var monthChange = document.getElementById('profile-month-change');
+	      if (monthChange) {
+	        monthChange.textContent = '';
+	        monthChange.style.display = 'none';
+	      }
+	      var cards = document.querySelectorAll('#pt-monthly .stat-card');
+	      var totalRank = monthlyRankPosition(appData.staff, 'sales', currentStaff.name);
+	      var fanRank = monthlyRankPosition(appData.staff, 'fan-rate', currentStaff.name);
+	      var trustRank = monthlyRankPosition(appData.staff, 'new-price', currentStaff.name);
+	      var ticketRank = monthlyRankPosition(appData.staff, 'new-ticket-rate', currentStaff.name);
+	      var reviewRank = monthlyRankPosition(appData.staff, 'review', currentStaff.name);
+	      if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">総合売上ランク</div><div class="stat-val" style="color:var(--bronze)">' + fmtRank(totalRank, appData.staff.length, '名') + '</div><div class="stat-sub">売上<strong>' + fmtYenMan(currentStaff.totalSales) + '</strong></div>';
+	      if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">ファン化ランク</div><div class="stat-val" style="color:var(--silver)">' + fmtRank(fanRank, appData.staff.length, '名') + '</div><div class="stat-sub">更新率<strong>' + fmtPct(currentStaff.renewalRate) + '</strong></div>';
+	      if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">信頼獲得ランク</div><div class="stat-val" style="color:var(--text)">' + fmtRank(trustRank, appData.staff.length, '名') + '</div><div class="stat-sub">新規LTV<strong>' + fmtYen(currentStaff.newLtv) + '</strong></div>';
+	      if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">口コミランク</div><div class="stat-val" style="color:var(--bronze)">' + fmtRank(reviewRank, appData.staff.length, '名') + '</div><div class="stat-sub">口コミ<strong>' + Math.round(currentStaff.reviews) + '件</strong></div>';
+	      if (cards[4]) cards[4].innerHTML = '<div class="stat-lbl">更新数</div><div class="stat-val" style="color:var(--text)">' + Math.round(currentStaff.renewalCount) + '<span class="stat-unit">件</span></div><div class="stat-sub">既存数<strong>' + Math.round(currentStaff.existingCount) + '件</strong></div>';
+	      if (cards[5]) cards[5].innerHTML = '<div class="stat-lbl">更新売上</div><div class="stat-val" style="color:var(--text)">' + fmtYenMan(currentStaff.renewalSales) + '</div><div class="stat-sub">更新LTV<strong>' + fmtYen(currentStaff.renewalLtv) + '</strong></div>';
+	      if (cards[6]) cards[6].innerHTML = '<div class="stat-lbl">回数券購入率</div><div class="stat-val" style="color:var(--text)">' + fmtPct(currentStaff.ticketPurchaseRate) + '</div><div class="stat-sub">ランク<strong>' + fmtRank(ticketRank, appData.staff.length, '名') + '</strong></div>';
+	      updateHistoryData(currentStaff);
+	      renderTrophyStatus(currentStaff);
+	    }
     renderRankList('rl-m-sales', appData.staff, 'sales', { currentName: currentStaff.name, unit: '名', sub: function(i){ return 'LTV ' + fmtYen(i.ltv); } });
     renderRankList('rl-m-existing', appData.staff, rankMetricState['rl-m-existing'], { currentName: currentStaff.name, unit: '名', sub: function(i){ return '更新売上 ' + fmtYenMan(i.renewalSales); } });
     renderRankList('rl-m-new', appData.staff, rankMetricState['rl-m-new'], { currentName: currentStaff.name, unit: '名', sub: function(i){ return '新規売上 ' + fmtYenMan(i.newSales); } });
@@ -2088,20 +2182,6 @@ function renderSheetData(opts) {
   if (updateProfile) renderAnnualZeroData();
 }
 
-function renderFanProfile(currentStaff) {
-  var score = document.querySelector('#pt-fan .fan-score');
-  if (score) score.textContent = fmtPct(currentStaff && currentStaff.renewalRate);
-  var cards = document.querySelectorAll('#pt-fan .stat-card');
-  var fanRank = rankPosition(appData.staff, 'fan-rate', currentStaff && currentStaff.name);
-  var countRank = rankPosition(appData.staff, 'fan-count', currentStaff && currentStaff.name);
-  var salesRank = rankPosition(appData.staff, 'fan-sales', currentStaff && currentStaff.name);
-  var priceRank = rankPosition(appData.staff, 'fan-price', currentStaff && currentStaff.name);
-  if (cards[0]) cards[0].innerHTML = '<div class="stat-lbl">更新率</div><div class="stat-val" style="color:var(--silver)">' + fmtPct(currentStaff && currentStaff.renewalRate) + '</div><div class="stat-sub">ランク<strong>' + metricRankText(fanRank) + '</strong></div>';
-  if (cards[1]) cards[1].innerHTML = '<div class="stat-lbl">更新数</div><div class="stat-val">' + Math.round(currentStaff && currentStaff.renewalCount || 0) + '<span class="stat-unit">件</span></div><div class="stat-sub">ランク<strong>' + metricRankText(countRank) + '</strong></div>';
-  if (cards[2]) cards[2].innerHTML = '<div class="stat-lbl">更新売上</div><div class="stat-val">' + fmtYen(currentStaff && currentStaff.renewalSales) + '</div><div class="stat-sub">ランク<strong>' + metricRankText(salesRank) + '</strong></div>';
-  if (cards[3]) cards[3].innerHTML = '<div class="stat-lbl">更新LTV</div><div class="stat-val" style="color:var(--gold)">' + fmtYen(currentStaff && currentStaff.renewalLtv) + '</div><div class="stat-sub">ランク<strong>' + metricRankText(priceRank) + '</strong></div>';
-}
-
 function renderTrophyStatus(currentStaff) {
   var container = document.querySelector('#pt-trophy .sec');
   if (!container) return;
@@ -2110,6 +2190,50 @@ function renderTrophyStatus(currentStaff) {
     return;
   }
   container.innerHTML = '<div class="sec-hd">実績ステータス</div><div class="card"><div class="stat-lbl">実績集計中</div><div class="stat-sub">ランキング獲得回数は月末確定後に更新されます。</div></div>';
+}
+
+function loadAnnualMonthData(monthInfo) {
+  var staffSheet = monthInfo.year + '/' + monthInfo.month + '_スタッフ';
+  var storeSheet = monthInfo.year + '/' + monthInfo.month + '_店舗';
+  return Promise.all([
+    loadGoogleSheet(staffSheet).then(function(table) {
+      return tableMatchesMonth(table, monthInfo) ? parseStaffTable(table) : [];
+    }).catch(function(err) {
+      console.warn(staffSheet + ' annual skip', err);
+      return [];
+    }),
+    loadGoogleSheet(storeSheet).then(function(table) {
+      return tableMatchesMonth(table, monthInfo) ? parseStoreTable(table) : [];
+    }).catch(function(err) {
+      console.warn(storeSheet + ' annual skip', err);
+      return [];
+    })
+  ]).then(function(result) {
+    return { month: monthInfo, staff: result[0], stores: result[1] };
+  });
+}
+
+function loadAnnualSheetData(opts) {
+  var silent = opts && opts.silent;
+  var seq = ++annualLoadSeq;
+  var months = annualPeriodMonths();
+  if (!silent) setSheetStatus('年間データを同期中...');
+  return Promise.all(months.map(loadAnnualMonthData)).then(function(results) {
+    if (seq !== annualLoadSeq) return;
+    appData.annualMonths = months;
+    appData.annualStaff = aggregateAnnualItems(results.map(function(item) { return item.staff; }), defaultStaffBase(), false);
+    appData.annualStores = aggregateAnnualItems(results.map(function(item) { return item.stores; }), defaultStoreBase(), true);
+    renderAnnualZeroData();
+    if (!silent) setSheetStatus('年間データ ' + monthKey(months[0]) + ' - ' + monthKey(months[months.length - 1]) + ' 反映済み');
+  }).catch(function(err) {
+    if (seq !== annualLoadSeq) return;
+    appData.annualMonths = months;
+    appData.annualStaff = annualZeroStaff();
+    appData.annualStores = annualZeroStores();
+    renderAnnualZeroData();
+    if (!silent) setSheetStatus('年間データは未登録のため0表示', false);
+    console.warn(err);
+  });
 }
 
 function loadMonthlySheetData(opts) {
